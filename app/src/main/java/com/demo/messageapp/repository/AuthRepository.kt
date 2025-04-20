@@ -1,12 +1,14 @@
 package com.demo.messageapp.repository
 
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.auth
+//import com.google.firebase.auth.ktx.auth
+//import com.google.firebase.ktx.Firebase
 
 class AuthRepository {
-    private val auth: FirebaseAuth = Firebase.auth
+//  private val auth: FirebaseAuth = Firebase.auth
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
 
     fun register(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
@@ -35,7 +37,7 @@ class AuthRepository {
     }
 
     fun sendEmailVerification(callback: (Boolean, String?) -> Unit) {
-        val user = Firebase.auth.currentUser
+        val user = auth.currentUser
 
         user!!.sendEmailVerification()
               .addOnCompleteListener {task ->
@@ -48,7 +50,7 @@ class AuthRepository {
     }
 
     fun updatePassword(newPassword: String, callback: (Boolean, String?) -> Unit) {
-        val user = Firebase.auth.currentUser
+        val user = auth.currentUser
 
         user!!.updatePassword(newPassword)
               .addOnCompleteListener { task ->
