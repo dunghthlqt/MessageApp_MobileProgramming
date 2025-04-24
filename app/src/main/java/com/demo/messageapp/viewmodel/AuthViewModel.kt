@@ -13,6 +13,7 @@ class AuthViewModel : ViewModel() {
     val currentUser = MutableLiveData<User?>()
     val sendEmailVerificationResult = MutableLiveData<Pair<Boolean, String?>>()
     val updatePasswordResult = MutableLiveData<Pair<Boolean, String?>>()
+    val createUserProfileResult = MutableLiveData<Pair<Boolean, String?>>()
 
     fun register(email: String, password: String) {
         repository.register(email, password) { success, message -> registerResult.value = Pair(success, message) }
@@ -41,5 +42,8 @@ class AuthViewModel : ViewModel() {
     }
     fun updatePassword(newPassword: String) {
         repository.updatePassword(newPassword){ success, message -> updatePasswordResult.value = Pair(success, message) }
+    }
+    fun createUserProfile() {
+        repository.createUserProfile{ success, message -> createUserProfileResult.value = Pair(success, message) }
     }
 }
