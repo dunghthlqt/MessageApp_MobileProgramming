@@ -1,0 +1,132 @@
+package com.demo.messageapp.repository
+
+import com.demo.messageapp.model.User
+import com.google.firebase.firestore.FirebaseFirestore
+
+class UserRepository {
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    fun searchUserbyUid(userUid: String, callback: (Boolean, String?, User?) -> Unit) {
+        db.collection("users")
+            .whereEqualTo("uid", userUid)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if(!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0]
+
+                    val uid = document.id
+                    val email = document.getString("email") ?: ""
+                    val displayName = document.getString("displayName") ?: ""
+                    val avatarUrl = document.getString("avatarUrl") ?: ""
+                    val isOnline = document.getBoolean("isOnline") ?: false
+
+                    val user = User(
+                        uid = uid,
+                        email = email,
+                        displayName = displayName,
+                        avatarUrl = avatarUrl,
+                        isOnline = isOnline
+                    )
+
+                    callback(true, null, user)
+                }
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
+    fun getUserList(callback: (Boolean, String?, List<User>?) -> Unit) {
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { users ->
+                val userList = mutableListOf<User>()
+                for(user in users) {
+
+                    val uid = user.id
+                    val email = user.getString("email") ?: ""
+                    val displayName = user.getString("displayName") ?: ""
+                    val avatarUrl = user.getString("avatarUrl") ?: ""
+                    val isOnline = user.getBoolean("isOnline") ?: false
+
+                    val userr = User(
+                        uid = uid,
+                        email = email,
+                        displayName = displayName,
+                        avatarUrl = avatarUrl,
+                        isOnline = isOnline
+                    )
+
+                    userList.add(userr)
+                }
+                callback(true, null, userList)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
+    fun searchUserbyName(name: String, callback: (Boolean, String?, User?) -> Unit) {
+        db.collection("users")
+            .whereEqualTo("displayName", name)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val document = querySnapshot.documents[0]
+
+                val uid = document.id
+                val email = document.getString("email") ?: ""
+                val displayName = document.getString("displayName") ?: ""
+                val avatarUrl = document.getString("avatarUrl") ?: ""
+                val isOnline = document.getBoolean("isOnline") ?: false
+
+                val user = User(
+                    uid = uid,
+                    email = email,
+                    displayName = displayName,
+                    avatarUrl = avatarUrl,
+                    isOnline = isOnline
+                )
+
+                callback(true, null, user)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
+    fun searchUserbyEmail(email: String, callback: (Boolean, String?, User?) -> Unit) {
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val document = querySnapshot.documents[0]
+
+                val uid = document.id
+                val email = document.getString("email") ?: ""
+                val displayName = document.getString("displayName") ?: ""
+                val avatarUrl = document.getString("avatarUrl") ?: ""
+                val isOnline = document.getBoolean("isOnline") ?: false
+
+                val user = User(
+                    uid = uid,
+                    email = email,
+                    displayName = displayName,
+                    avatarUrl = avatarUrl,
+                    isOnline = isOnline
+                )
+
+                callback(true, null, user)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
+    fun updateDisplayName(userUid: String, newName: String, callback: (Boolean, String?) -> Unit) {
+        db.collection("users")
+            .document(userUid)
+            .update("displayName", newName)
+            .addOnSuccessListener { _ ->
+                callback(true, null)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message)
+            }
+    }
+}
