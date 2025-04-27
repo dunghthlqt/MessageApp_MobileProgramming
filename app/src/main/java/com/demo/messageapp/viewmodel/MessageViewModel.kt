@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.demo.messageapp.model.Message
 import com.demo.messageapp.model.resultmodel.GetMessageListResult
+import com.demo.messageapp.model.resultmodel.SearchMessageResult
 import com.demo.messageapp.repository.MessageRepository
 
 class MessageViewModel : ViewModel() {
@@ -12,7 +13,7 @@ class MessageViewModel : ViewModel() {
     val sendMessageResult = MutableLiveData<Pair<Boolean, String?>>()
     val deleteMessageResult = MutableLiveData<Pair<Boolean, String?>>()
     val getMessageListResult = MutableLiveData<GetMessageListResult>()
-
+    val searchMessageResult = MutableLiveData<SearchMessageResult>()
 
     fun sendMessage(conversationId: String, message: Message) {
         repository.sendMessage(conversationId, message) {success, message ->
@@ -27,6 +28,11 @@ class MessageViewModel : ViewModel() {
     fun getMessageList(conversationId: String) {
         repository.getMessageList(conversationId) {success, message, messageList ->
             getMessageListResult.value = GetMessageListResult(success, message, messageList)
+        }
+    }
+    fun searchMessage(conversationId: String, input: String) {
+        repository.searchMessage(conversationId, input) { success, message, messageList ->
+            searchMessageResult.value = SearchMessageResult(success, message, messageList)
         }
     }
 }

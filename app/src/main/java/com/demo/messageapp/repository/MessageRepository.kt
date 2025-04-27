@@ -67,4 +67,40 @@ class MessageRepository {
                 callback(false, e.message, null)
             }
     }
+    fun searchMessage(conversationId: String, input: String, callback: (Boolean, String?, List<Message>?) -> Unit) {
+        db.collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val messageList = mutableListOf<Message>()
+                for(document in querySnapshot) {
+                    val id = document.id
+                    val senderId = document.getString("senderId") ?: ""
+                    val receiverId = document.getString("receiverId") ?: ""
+                    val content = document.getString("content") ?: ""
+                    val timestamp = document.getLong("timestamp") ?: 0
+                    val type = document.getString("type") ?: ""
+                    val deleted = document.getBoolean("deleted") ?: false
+
+                    val message = Message(
+                        id = id,
+                        senderId = senderId,
+                        receiverId = receiverId,
+                        content = content,
+                        timestamp = timestamp,
+                        type = type,
+                        deleted = deleted
+                    )
+                    if (message.content.contains(input, ignoreCase = true)) {
+                        messageList.add(message)
+                    }
+                }
+
+                callback(true, null, messageList)
+            }
+            .addOnFailureListener{ e ->
+                callback(false, e.message, null)
+            }
+    }
 }
