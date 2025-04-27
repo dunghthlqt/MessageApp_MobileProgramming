@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">MessageApp</string>
+    <string name="logo">Logo</string>
+    <string name="welcome">Welcome</string>
+    <string name="slogan">It is free and security</string>
+    <string name="start">Start</string>
+    <string name="email">Email</string>
+    <string name="password">Passwork</string>
+    <string name="login">Login</string>
+    <string name="text1">Don&quot;t have an account?</string>
+    <string name="register">Register</string>
+    <string name="signup">Sign Up</string>
+    <string name="signin">Sign In</string>
+    <string name="text2">Already have an account?</string>
+    <string name="reenterpassword">Re-enter Password</string>
 </resources>
