@@ -12,8 +12,7 @@ class ConversationViewModel : ViewModel() {
     val createConversationResult = MutableLiveData<CreateConversationResult>()
     val deleteConversationResult = MutableLiveData<Pair<Boolean, String?>>()
     val getConversationListResult = MutableLiveData<GetConversationListResult>()
-
-
+    
     fun createConversation(participantIds: List<String>) {
         repository.createConversation(participantIds) {success, message, conversationId ->
             createConversationResult.value = CreateConversationResult(success, message, conversationId)
