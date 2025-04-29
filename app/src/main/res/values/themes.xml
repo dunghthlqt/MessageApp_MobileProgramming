@@ -1,8 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.MessageApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/colorPrimari</item>
+        <item name="colorSecondary">@color/whilegray</item>
+        <item name="android:windowBackground">@color/whilegray</item>
+
     </style>
 
     <style name="Theme.MessageApp" parent="Base.Theme.MessageApp" />
