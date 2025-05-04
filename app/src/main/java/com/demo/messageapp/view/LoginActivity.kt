@@ -2,6 +2,7 @@ package com.demo.messageapp.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -15,7 +16,6 @@ import com.google.android.material.textfield.TextInputEditText
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var login: Button
-    private lateinit var signUp: TextView
 
     private lateinit var viewModel: AuthViewModel
 
@@ -28,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
         val editTextPassword: EditText = findViewById<TextInputEditText>(R.id.password)
 
         login = findViewById(R.id.login)
-        signUp = findViewById(R.id.sign_up)
+        val signUp: TextView = findViewById(R.id.sign_up)
 
         viewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
 
@@ -46,18 +46,17 @@ class LoginActivity : AppCompatActivity() {
         }
         viewModel.sendEmailVerificationResult.observe(this) { (success, message) ->
             if (success) {
-                Toast.makeText(this, "Đã ...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đã đăng nhập thành công!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Lỗi đăng nhập: $message", Toast.LENGTH_SHORT).show()
             }
         }
 
         signUp.setOnClickListener {
-            Toast.makeText(this, "Register button clicked", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
-            startActivity(intent)
-            finish()
+            openRegisterPage()
         }
+
+
 
         login.setOnClickListener()
         {
@@ -72,5 +71,9 @@ class LoginActivity : AppCompatActivity() {
             viewModel.login(email, password)
         }
 
+    }
+    fun openRegisterPage() {
+        val intent = Intent(this, RegisterActivity::class.java)
+        startActivity(intent)
     }
 }

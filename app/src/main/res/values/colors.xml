@@ -5,4 +5,7 @@
     <color name="whilegray">#F4F4F4</color>
     <color name="colorPrimari">#1DA1F2</color>
     <color name="link_color">#0000FF</color>
+    <color name="colorAccent">#FF6347</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="gray">#808080</color>
 </resources>

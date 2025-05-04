@@ -102,8 +102,9 @@
             android:focusable="true"
             android:textColor="@color/colorPrimari"
             android:textSize="18sp"
-            android:textStyle="bold" />
-
+            android:onClick="openRegisterPage"
+            android:textStyle="bold"
+            tools:ignore="OnClick" />
     </LinearLayout>
 
 
