@@ -2,9 +2,13 @@ package com.demo.messageapp.repository
 
 import com.demo.messageapp.model.Message
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 
 class MessageRepository {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private var messageListener: ListenerRegistration? = null
 
     fun sendMessage(conversationId: String, message: Message, callback: (Boolean, String?) -> Unit) {
         val docRef = db.collection("conversations").document(conversationId)
@@ -102,5 +106,48 @@ class MessageRepository {
             .addOnFailureListener{ e ->
                 callback(false, e.message, null)
             }
+    }
+    fun addMessageListener(conversationId: String, callback: (Boolean, String?, List<Message>?) -> Unit) {
+        messageListener?.remove()
+
+        messageListener = db.collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null || snapshots == null) {
+                    callback(false, "Snapshot is null", null)
+                    return@addSnapshotListener
+                }
+
+                val messageList = mutableListOf<Message>()
+                for (docChange in snapshots.documentChanges) {
+                    if (docChange.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                        val id = docChange.document.id
+                        val senderId = docChange.document.getString("senderId") ?: ""
+                        val receiverId = docChange.document.getString("receiverId") ?: ""
+                        val content = docChange.document.getString("content") ?: ""
+                        val timestamp = docChange.document.getLong("timestamp") ?: 0
+                        val type = docChange.document.getString("type") ?: ""
+                        val deleted = docChange.document.getBoolean("deleted") ?: false
+
+                        val message = Message(
+                            id = id,
+                            senderId = senderId,
+                            receiverId = receiverId,
+                            content = content,
+                            timestamp = timestamp,
+                            type = type,
+                            deleted = deleted
+                        )
+
+                        messageList.add(message)
+                    }
+                }
+                callback(true, null, messageList)
+            }
+    }
+    fun removeMessageListener() {
+        messageListener?.remove()
     }
 }
