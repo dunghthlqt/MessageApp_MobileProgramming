@@ -118,7 +118,7 @@
             android:clickable="true"
             android:focusable="true"
             android:onClick="openLoginPage"
-            android:textColor="@color/colorPrimari"
+            android:textColor="@color/colorPrimary"
             android:textSize="18sp"
             android:textStyle="bold" />
 

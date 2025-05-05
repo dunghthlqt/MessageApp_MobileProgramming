@@ -5,5 +5,8 @@ data class User (
     val email: String = "",
     val displayName: String = "",
     val avatarUrl: String = "",
-    val isOnline: Boolean = false
+    val isOnline: Boolean = false,
+
+    //duc them cai nay
+    val messages: List<Message> = listOf()
 )
