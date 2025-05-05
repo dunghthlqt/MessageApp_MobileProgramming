@@ -100,7 +100,7 @@
             android:text="@string/register"
             android:clickable="true"
             android:focusable="true"
-            android:textColor="@color/colorPrimari"
+            android:textColor="@color/colorPrimary"
             android:textSize="18sp"
             android:onClick="openRegisterPage"
             android:textStyle="bold"

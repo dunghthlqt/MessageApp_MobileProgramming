@@ -1,14 +1,18 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/chats"
-        android:icon="@drawable/ic_chat"
+        android:icon="@drawable/icon_chat"
+        app:showAsAction="ifRoom"
         android:title="@string/chats" />
     <item
         android:id="@+id/contacts"
         android:icon="@drawable/ic_contacts"
+        app:showAsAction="ifRoom"
         android:title="@string/contacts" />
     <item
         android:id="@+id/settings"
-        android:icon="@drawable/ic_settings"
+        android:icon="@drawable/icon_setting"
+        app:showAsAction="ifRoom"
         android:title="@string/settings" />
 </menu>
