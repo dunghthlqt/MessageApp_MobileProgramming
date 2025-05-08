@@ -23,8 +23,8 @@ class ConversationViewModel : ViewModel() {
             deleteConversationResult.value = Pair(success, message)
         }
     }
-    fun getConversationList() {
-        repository.getConversationList() {success, message, conversationList ->
+    fun getConversationList(userUid: String) {
+        repository.getConversationList(userUid) {success, message, conversationList ->
             getConversationListResult.value = GetConversationListResult(success, message, conversationList)
         }
     }

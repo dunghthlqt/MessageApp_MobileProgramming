@@ -1,6 +1,8 @@
 package com.demo.messageapp.view
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -9,14 +11,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.demo.messageapp.R
 import com.demo.messageapp.viewmodel.UserViewModel
-import com.demo.messageapp.view.MessagesAdapter
+//import com.demo.messageapp.view.MessagesAdapter
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: RecyclerView
-    private lateinit var messagesAdapter: MessagesAdapter
+//    private lateinit var messagesAdapter: MessagesAdapter
     private lateinit var userViewModel: UserViewModel
+    private lateinit var button: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,14 +31,14 @@ class SearchActivity : AppCompatActivity() {
         searchView = findViewById(R.id.searchView)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        messagesAdapter = MessagesAdapter()
-        recyclerView.adapter = messagesAdapter
+//        messagesAdapter = MessagesAdapter()
+//        recyclerView.adapter = messagesAdapter
 
         // Set up observer for search results
         userViewModel.searchUserbyNameResult.observe(this, { result ->
             if (result.success) {
                 result.user?.messages?.let { messages ->
-                    messagesAdapter.submitList(messages)  // Cập nhật danh sách tin nhắn
+//                    messagesAdapter.submitList(messages)  // Cập nhật danh sách tin nhắn
                 }
             } else {
                 Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
@@ -45,7 +48,7 @@ class SearchActivity : AppCompatActivity() {
         userViewModel.searchUserbyUidResult.observe(this, { result ->
             if (result.success) {
                 result.user?.messages?.let { messages ->
-                    messagesAdapter.submitList(messages)
+//                    messagesAdapter.submitList(messages)
                 }
             } else {
                 Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
@@ -55,7 +58,7 @@ class SearchActivity : AppCompatActivity() {
         userViewModel.searchUserbyEmailResult.observe(this, { result ->
             if (result.success) {
                 result.user?.messages?.let { messages ->
-                    messagesAdapter.submitList(messages)
+//                    messagesAdapter.submitList(messages)
                 }
             } else {
                 Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
