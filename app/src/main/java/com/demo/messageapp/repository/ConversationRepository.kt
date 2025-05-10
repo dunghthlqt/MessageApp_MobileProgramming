@@ -1,45 +1,64 @@
 package com.demo.messageapp.repository
 
+import android.util.Log
+import androidx.lifecycle.ViewModelProvider
 import com.demo.messageapp.model.Conversation
+import com.demo.messageapp.viewmodel.ConversationViewModel
+import com.demo.messageapp.viewmodel.UserViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ConversationRepository {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-//    fun createConversation(participantIds: List<String>, callback: (Boolean, String?, String?) -> Unit) {
-//        val newConversation = Conversation(
-//            participantIds = participantIds,
-//            createdAt = System.currentTimeMillis(),
-//        )
-//
-//        db.collection("conversations")
-//            .add(newConversation)
-//            .addOnSuccessListener { docRef ->
-//                callback(true, null, docRef.id)
-//            }
-//            .addOnFailureListener { e ->
-//                callback(false, e.message, null)
-//            }
-//    }
-    fun createConversation(participantIds: List<String>, callback: (Boolean, String?, String?) -> Unit) {
-        val conversationRef = db.collection("conversations")
-                                .document()
-
+    fun createConversation(participantIds: List<String>, conversationName: String, currentUserId: String, callback: (Boolean, String?, String?) -> Unit) {
+        val conversationRef = db.collection("conversations").document()
         val conversationId = conversationRef.id
 
-        val conversation = Conversation(
-            id = conversationId,
-            createdAt = System.currentTimeMillis(),
-            participantIds = participantIds
-        )
+        if (conversationName.isNotEmpty()) {
+            // Nếu có tên cuộc trò chuyện, tạo và lưu cuộc trò chuyện ngay lập tức
+            val conversation = Conversation(
+                id = conversationId,
+                createdAt = System.currentTimeMillis(),
+                participantIds = participantIds,
+                conversationName = conversationName,
+                createBy = currentUserId
+            )
 
-        conversationRef.set(conversation)
-            .addOnSuccessListener { _ ->
-                callback(true, null, conversationId)
+            conversationRef.set(conversation)
+                .addOnSuccessListener { _ ->
+                    callback(true, null, conversationId)
+                }
+                .addOnFailureListener { e ->
+                    callback(false, e.message, null)
+                }
+        } else {
+            // Nếu không có tên cuộc trò chuyện, tìm người dùng khác để lấy tên
+            val otherUserId = participantIds.find { it != currentUserId }
+
+            if (otherUserId != null) {
+                val userRepository = UserRepository()
+                userRepository.searchUserbyUid(otherUserId) { success, errorMessage, user ->
+                    if (success && user != null) {
+                        // Tạo cuộc trò chuyện với tên là tên người dùng khác
+                        val conversation = Conversation(
+                            id = conversationId,
+                            createdAt = System.currentTimeMillis(),
+                            participantIds = participantIds,
+                            conversationName = user.displayName,
+                            createBy = currentUserId
+                        )
+
+                        conversationRef.set(conversation)
+                            .addOnSuccessListener { _ ->
+                                callback(true, null, conversationId)
+                            }
+                            .addOnFailureListener { e ->
+                                callback(false, e.message, null)
+                            }
+                    }
+                }
             }
-            .addOnFailureListener { e ->
-                callback(false, e.message, null)
-            }
+        }
     }
     fun deleteConversation(conversationId: String, callback: (Boolean, String?) -> Unit) {
         db.collection("conversations")
@@ -56,12 +75,15 @@ class ConversationRepository {
     fun getConversationList(userUid: String, callback: (Boolean, String?, List<Conversation>?) -> Unit) {
         val userCollection = db.collection("users")
 
+        Log.d("ConversationRepository", "userUid = $userUid")
+
         userCollection.document(userUid)
             .get()
             .addOnSuccessListener { document ->
-                val joinedConversation = document.get("joinedConversation") as? List<String>
+                val joinedConversation = document.get("joinedConversations") as? List<String>
 
                 if (joinedConversation == null || joinedConversation.isEmpty()) {
+                    Log.d("ConversationRepository", "Error")
                     callback(true, null, emptyList())
                     return@addOnSuccessListener
                 }
@@ -80,13 +102,19 @@ class ConversationRepository {
                                 val lastMessage = document.getString("lastMessage") ?: ""
                                 val participantIds = document.get("participantIds") as? List<String> ?: listOf()
                                 val deleted = document.getBoolean("deleted") ?: false
+                                val conversationName = document.getString("conversationName") ?: ""
+                                val createBy = document.getString("createBy") ?: ""
+
+                                Log.d("ConversationID", "userUid = $id")
 
                                 val conversation = Conversation(
                                     id = id,
                                     createdAt = createdAt,
                                     participantIds = participantIds,
                                     lastMessage = lastMessage,
-                                    deleted = deleted
+                                    deleted = deleted,
+                                    conversationName = conversationName,
+                                    createBy = createBy
                                 )
                                 conversationList.add(conversation)
                             }

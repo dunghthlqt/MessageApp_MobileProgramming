@@ -2,83 +2,84 @@ package com.demo.messageapp.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.demo.messageapp.R
-import com.demo.messageapp.viewmodel.MessageViewModel
-import com.demo.messageapp.view.MessagesAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.demo.messageapp.databinding.ActivityHomeBinding
+import com.demo.messageapp.view.adapter.ConversationAdapter
+import com.demo.messageapp.viewmodel.AuthViewModel
+import com.demo.messageapp.viewmodel.ConversationViewModel
 
 class HomeActivity : AppCompatActivity() {
-    private lateinit var messageViewModel: MessageViewModel
-    private lateinit var messagesRecyclerView: RecyclerView
-    private lateinit var messagesAdapter: MessagesAdapter
-    private lateinit var noMessagesTextView: TextView
-    private lateinit var addMessage: FloatingActionButton
+
+    private lateinit var binding: ActivityHomeBinding
+    private lateinit var adapter: ConversationAdapter
+    private lateinit var conversationViewModel: ConversationViewModel
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        val toolbar: Toolbar = binding.toolbar
         setSupportActionBar(toolbar)
 
-        messageViewModel = ViewModelProvider(this).get(MessageViewModel::class.java)
+        conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
+        authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
-        messagesRecyclerView = findViewById(R.id.messagesRecyclerView)
-        messagesRecyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = ConversationAdapter(emptyList()) { conversation ->
+            // TODO: Xử lý khi người dùng nhấn vào 1 cuộc trò chuyện
+        }
 
-        messagesAdapter = MessagesAdapter()
-        messagesRecyclerView.adapter = messagesAdapter
+        binding.conversationRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.conversationRecyclerView.adapter = adapter
 
-        noMessagesTextView = findViewById(R.id.noMessagesTextView)
-        addMessage = findViewById(R.id.btnAddMessage)
+        var currentUid: String = ""
 
-        messageViewModel.getMessageListResult.observe(this, Observer { result ->
+        authViewModel.currentUser.observe(this, Observer { result ->
+            if (result != null) {
+                currentUid = result.uid
+            }
+            conversationViewModel.getConversationList(currentUid)
+        })
+
+        conversationViewModel.getConversationListResult.observe(this, Observer { result ->
             if (result.success) {
-                result.messageList?.let {
+                result.conversationList?.let {
                     if (it.isEmpty()) {
-                        messagesRecyclerView.visibility = View.GONE
-                        noMessagesTextView.visibility = View.VISIBLE
+                        binding.conversationRecyclerView.visibility = View.GONE
+                        binding.noMessagesTextView.visibility = View.VISIBLE
                     } else {
-                        messagesRecyclerView.visibility = View.VISIBLE
-                        noMessagesTextView.visibility = View.GONE
-                        messagesAdapter.submitList(it)
+                        binding.conversationRecyclerView.visibility = View.VISIBLE
+                        binding.noMessagesTextView.visibility = View.GONE
+
+                        adapter.updateData(result.conversationList)
                     }
                 }
+            } else {
+                Log.d("Home", "Error = ${result.errorMessage}")
             }
         })
 
-        messageViewModel.getMessageList("123")
-    }
+        authViewModel.getCurrentUser()
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.toolbar_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.search_icon -> {
-                Toast.makeText(this, "Search clicked", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, SearchActivity::class.java)
-                startActivity(intent)
-                return true
-            }
-            else -> return super.onOptionsItemSelected(item)
+        binding.btnSearch.setOnClickListener{
+            Toast.makeText(this, "Search clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+        }
+        binding.btnContacts.setOnClickListener{
+            Toast.makeText(this, "Contacts clicked", Toast.LENGTH_SHORT).show()
+        }
+        binding.btnSetting.setOnClickListener{
+            Toast.makeText(this, "Setting clicked", Toast.LENGTH_SHORT).show()
         }
     }
-
 }
