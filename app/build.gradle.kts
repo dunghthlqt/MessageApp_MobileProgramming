@@ -4,6 +4,7 @@ plugins {
 
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 android {
@@ -54,6 +55,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-database")
+
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
