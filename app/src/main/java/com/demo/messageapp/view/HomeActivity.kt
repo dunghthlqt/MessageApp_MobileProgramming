@@ -77,6 +77,8 @@ class HomeActivity : AppCompatActivity() {
         }
         binding.btnContacts.setOnClickListener{
             Toast.makeText(this, "Contacts clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ContactsActivity::class.java)
+            startActivity(intent)
         }
         binding.btnSetting.setOnClickListener{
             Toast.makeText(this, "Setting clicked", Toast.LENGTH_SHORT).show()

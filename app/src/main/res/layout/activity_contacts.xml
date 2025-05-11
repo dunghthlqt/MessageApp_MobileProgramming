@@ -26,10 +26,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/textnonchat"
+        android:text="Bạn chưa có contacts nào"
         android:textColor="#666666"
         android:textSize="18sp"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/conversationRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -46,6 +47,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
+            android:id="@+id/btn_chat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -74,7 +76,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical"
@@ -121,20 +122,21 @@
         </LinearLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_add"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="70dp"
-        android:clickable="true"
-        android:src="@drawable/edit"
-        android:tint="#ffffff"
-        app:backgroundTint="#51B1E0"
-        app:fabSize="normal"
+        android:text="New Contact"
+        android:textColor="@android:color/black"
+        app:icon="@drawable/add"
+        app:iconTint="@android:color/black"
+        app:iconGravity="textStart"
+        app:backgroundTint="#DEEFF8"
+        app:cornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -160,7 +162,7 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="70dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="15dp"
             android:text="Contacts"
             android:textColor="#FFFFFF"
@@ -169,17 +171,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="13dp"
-            android:background="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back"
-            app:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

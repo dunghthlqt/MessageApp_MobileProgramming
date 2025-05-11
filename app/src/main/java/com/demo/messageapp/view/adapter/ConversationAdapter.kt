@@ -3,12 +3,8 @@ package com.demo.messageapp.view.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.demo.messageapp.R
 import com.demo.messageapp.databinding.ItemConversationBinding
 import com.demo.messageapp.model.Conversation
-//import com.amulyakhare.textdrawable.TextDrawable
-//import com.amulyakhare.textdrawable.util.ColorGenerator
 
 class ConversationAdapter(
     private var conversations: List<Conversation>,
