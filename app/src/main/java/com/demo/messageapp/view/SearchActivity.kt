@@ -36,33 +36,33 @@ class SearchActivity : AppCompatActivity() {
 
         // Set up observer for search results
         userViewModel.searchUserbyNameResult.observe(this, { result ->
-            if (result.success) {
-                result.user?.messages?.let { messages ->
-//                    messagesAdapter.submitList(messages)  // Cập nhật danh sách tin nhắn
-                }
-            } else {
-                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
-            }
+//            if (result.success) {
+//                result.user?.messages?.let { messages ->
+////                    messagesAdapter.submitList(messages)  // Cập nhật danh sách tin nhắn
+//                }
+//            } else {
+//                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
+//            }
         })
 
         userViewModel.searchUserbyUidResult.observe(this, { result ->
-            if (result.success) {
-                result.user?.messages?.let { messages ->
-//                    messagesAdapter.submitList(messages)
-                }
-            } else {
-                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
-            }
+//            if (result.success) {
+//                result.user?.messages?.let { messages ->
+////                    messagesAdapter.submitList(messages)
+//                }
+//            } else {
+//                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
+//            }
         })
 
         userViewModel.searchUserbyEmailResult.observe(this, { result ->
-            if (result.success) {
-                result.user?.messages?.let { messages ->
-//                    messagesAdapter.submitList(messages)
-                }
-            } else {
-                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
-            }
+//            if (result.success) {
+//                result.user?.messages?.let { messages ->
+////                    messagesAdapter.submitList(messages)
+//                }
+//            } else {
+//                Toast.makeText(this, result.errorMessage, Toast.LENGTH_SHORT).show()
+//            }
         })
 
         // Listen for search query changes
