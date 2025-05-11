@@ -22,4 +22,6 @@
     <string name="settings">Settings</string>
     <string name="textnonchat">Bạn chưa có tin nhắn nào</string>
     <string name="add_message">Thêm tin nhắn mới</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
