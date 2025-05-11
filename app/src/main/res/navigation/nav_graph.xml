@@ -10,6 +10,9 @@
         <action
             android:id="@+id/action_homeFragment_to_contactsFragment"
             app:destination="@id/contactsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_addMessageFragment"
+            app:destination="@id/addMessageFragment" />
     </fragment>
 
     <fragment
@@ -19,6 +22,15 @@
         <action
             android:id="@+id/action_contactsFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addMessageFragment"
+        android:name="com.demo.messageapp.view.fragment.AddMessageFragment"
+        android:label="AddMessage">
+        <action
+            android:id="@+id/action_addMessageFragment_to_homeFragment"
+            app:destination="@+id/homeFragment" />
     </fragment>
 
 </navigation>

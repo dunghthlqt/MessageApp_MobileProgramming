@@ -76,5 +76,9 @@ class HomeFragment : Fragment() {
         binding.btnSetting.setOnClickListener{
 
         }
+
+        binding.btnAdd.setOnClickListener{
+            findNavController().navigate(R.id.action_homeFragment_to_addMessageFragment)
+        }
     }
 }
