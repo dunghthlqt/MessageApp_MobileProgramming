@@ -26,10 +26,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/textnonchat"
+        android:text="Bạn chưa có contacts nào"
         android:textColor="#666666"
         android:textSize="18sp"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/conversationRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
