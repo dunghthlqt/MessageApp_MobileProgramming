@@ -129,4 +129,16 @@ class UserRepository {
                 callback(false, e.message)
             }
     }
+    fun getContactsUIDList(userUid: String, callback: (Boolean, String?, List<String>?) -> Unit) {
+        db.collection("users")
+            .document(userUid)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                val contactsUIDList = documentSnapshot.get("contacts") as? List<String> ?: listOf()
+                callback(true, null, contactsUIDList)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
 }
