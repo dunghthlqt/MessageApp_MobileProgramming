@@ -1,10 +1,14 @@
 package com.demo.messageapp.repository
 
 import com.demo.messageapp.model.User
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class UserRepository {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private var contactListener: ListenerRegistration? = null
 
     fun searchUserbyUid(userUid: String, callback: (Boolean, String?, User?) -> Unit) {
         db.collection("users")
@@ -140,5 +144,34 @@ class UserRepository {
             .addOnFailureListener { e ->
                 callback(false, e.message, null)
             }
+    }
+    fun addNewContact(userUid: String, contactUid: String, callback: (Boolean, String?) -> Unit) {
+        db.collection("users")
+            .document(userUid)
+            .update("contacts", FieldValue.arrayUnion(contactUid))
+            .addOnSuccessListener { _ ->
+                callback(true, null)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message)
+            }
+    }
+    fun addContactListener(userUid: String, callback: (Boolean, String?, List<String>?) -> Unit) {
+        contactListener?.remove()
+
+        contactListener = db.collection("users")
+            .document(userUid)
+            .addSnapshotListener { documentSnapshot, e ->
+                if (e != null || documentSnapshot == null) {
+                    callback(false, "Snapshot is null", null)
+                    return@addSnapshotListener
+                }
+
+                val contactsUIDList = documentSnapshot.get("contacts") as? List<String> ?: listOf()
+                callback(true, null, contactsUIDList)
+            }
+    }
+    fun removeContactListener() {
+        contactListener?.remove()
     }
 }
