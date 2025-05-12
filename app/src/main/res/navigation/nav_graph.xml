@@ -34,6 +34,12 @@
         <action
             android:id="@+id/action_addMessageFragment_to_homeFragment"
             app:destination="@+id/homeFragment" />
+        <action
+            android:id="@+id/action_addMessageFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_addMessageFragment_to_newContactFragment"
+            app:destination="@id/newContactFragment" />
     </fragment>
 
     <fragment
@@ -52,6 +58,12 @@
         <argument
             android:name="userUid"
             app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newContactFragment"
+        android:name="com.demo.messageapp.view.fragment.NewContactFragment"
+        android:label="NewContact">
     </fragment>
 
 </navigation>
