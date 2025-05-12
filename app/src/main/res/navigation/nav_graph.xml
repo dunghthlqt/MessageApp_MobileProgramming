@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_homeFragment_to_addMessageFragment"
             app:destination="@id/addMessageFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
     </fragment>
 
     <fragment
@@ -31,6 +34,24 @@
         <action
             android:id="@+id/action_addMessageFragment_to_homeFragment"
             app:destination="@+id/homeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.demo.messageapp.view.fragment.ChatFragment"
+        android:label="Chat">
+        <action
+            android:id="@+id/action_chatFragment_to_homeFragment"
+            app:destination="@+id/homeFragment" />
+        <argument
+            android:name="conversationId"
+            app:argType="string" />
+        <argument
+            android:name="conversationName"
+            app:argType="string" />
+        <argument
+            android:name="userUid"
+            app:argType="string" />
     </fragment>
 
 </navigation>

@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.messageapp.R
 import com.demo.messageapp.databinding.FragmentHomeBinding
+import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.view.adapter.ConversationAdapter
 import com.demo.messageapp.viewmodel.AuthViewModel
 import com.demo.messageapp.viewmodel.ConversationViewModel
@@ -21,6 +22,7 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: ConversationAdapter
     private lateinit var conversationViewModel: ConversationViewModel
     private lateinit var authViewModel: AuthViewModel
+    private var currentUid: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,11 +36,11 @@ class HomeFragment : Fragment() {
         conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
-        adapter = ConversationAdapter(emptyList()) { conversation -> /* handle click */ }
+        adapter = ConversationAdapter(emptyList()) { conversation ->
+            navigateToChatFragment(conversation)
+        }
         binding.conversationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.conversationRecyclerView.adapter = adapter
-
-        var currentUid: String = ""
 
         authViewModel.currentUser.observe(viewLifecycleOwner, Observer { result ->
             if (result != null) {
@@ -80,5 +82,14 @@ class HomeFragment : Fragment() {
         binding.btnAdd.setOnClickListener{
             findNavController().navigate(R.id.action_homeFragment_to_addMessageFragment)
         }
+    }
+
+    private fun navigateToChatFragment(conversation: Conversation) {
+         val action = HomeFragmentDirections.actionHomeFragmentToChatFragment(
+             conversationId = conversation.id,
+             conversationName = conversation.conversationName,
+             userUid = currentUid
+         )
+         findNavController().navigate(action)
     }
 }
