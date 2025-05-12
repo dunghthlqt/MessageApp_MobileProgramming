@@ -12,8 +12,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.messageapp.R
 import com.demo.messageapp.databinding.FragmentAddMessageBinding
+import com.demo.messageapp.model.Conversation
+import com.demo.messageapp.model.User
 import com.demo.messageapp.view.adapter.ContactsAdapter
 import com.demo.messageapp.viewmodel.AuthViewModel
+import com.demo.messageapp.viewmodel.ConversationViewModel
 import com.demo.messageapp.viewmodel.UserViewModel
 
 class AddMessageFragment : Fragment() {
@@ -24,6 +27,9 @@ class AddMessageFragment : Fragment() {
     private lateinit var adapter: ContactsAdapter
     private lateinit var userViewModel: UserViewModel
     private lateinit var authViewModel: AuthViewModel
+    private lateinit var conversationViewModel: ConversationViewModel
+    private var currentUid: String = ""
+    private var conversationName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,20 +44,32 @@ class AddMessageFragment : Fragment() {
 
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
         authViewModel = ViewModelProvider(requireActivity())[AuthViewModel::class.java]
+        conversationViewModel = ViewModelProvider(requireActivity())[ConversationViewModel::class.java]
+
+        conversationViewModel.resetConversationTwoUidResult()
 
         adapter = ContactsAdapter(emptyList()) { contact ->
-            // TODO: Xử lý khi người dùng nhấn vào 1 cuộc trò chuyện
+            conversationName = ""
+            conversationName = contact.displayName
+            conversationViewModel.getConversationTwoUID(currentUid, contact.uid)
         }
 
         binding.conversationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.conversationRecyclerView.adapter = adapter
 
+        conversationViewModel.getConversationTwoUidResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.success) {
+                if(result != null) {
+                    navigateToChatFragment(result.conversationId!!)
+                }
+            } else {
+                Log.d("ContactsFragment", "Error = ${result.errorMessage}")
+            }
+        })
+
         userViewModel.getUserListResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
                 result.userList?.let {
-                    for (user in it) {
-                        Log.d("ContactsFragment", "User = ${user.displayName}")
-                    }
                     adapter.updateData(it)
                 }
             } else {
@@ -78,6 +96,7 @@ class AddMessageFragment : Fragment() {
 
         authViewModel.currentUser.observe(viewLifecycleOwner, Observer { result ->
             result?.let {
+                currentUid = result.uid
                 userViewModel.getContactsUIDList(it.uid)
             }
         })
@@ -87,10 +106,29 @@ class AddMessageFragment : Fragment() {
         binding.btnBack.setOnClickListener {
             findNavController().navigate(R.id.action_addMessageFragment_to_homeFragment)
         }
+
+        binding.btnAdd.setOnClickListener {
+            val dialog = NewContactFragment()
+            dialog.show(parentFragmentManager, "NewContactDialog")
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onStop() {
+        super.onStop()
+        conversationViewModel.resetConversationTwoUidResult()
+    }
+
+    private fun navigateToChatFragment(conversationId: String) {
+        val action = AddMessageFragmentDirections.actionAddMessageFragmentToChatFragment(
+            conversationId = conversationId,
+            conversationName = conversationName,
+            userUid = currentUid
+        )
+        findNavController().navigate(action)
     }
 }
