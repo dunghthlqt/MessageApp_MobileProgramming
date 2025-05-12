@@ -5,6 +5,7 @@ plugins {
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    id ("androidx.navigation.safeargs.kotlin")
 }
 
 android {

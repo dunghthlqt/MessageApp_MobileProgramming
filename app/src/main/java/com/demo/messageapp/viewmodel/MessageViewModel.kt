@@ -16,8 +16,9 @@ class MessageViewModel : ViewModel() {
     val searchMessageResult = MutableLiveData<SearchMessageResult>()
     val addMessageListenerResult = MutableLiveData<GetMessageListResult>()
 
-    fun sendMessage(conversationId: String, message: Message) {
-        repository.sendMessage(conversationId, message) {success, message ->
+    fun sendMessage(conversationId: String, userUid: String, content: String) {
+
+        repository.sendMessage(conversationId, userUid, content) {success, message ->
             sendMessageResult.value = Pair(success, message)
         }
     }
@@ -36,8 +37,16 @@ class MessageViewModel : ViewModel() {
             searchMessageResult.value = SearchMessageResult(success, message, messageList)
         }
     }
-    fun addMessageListener(conversationId: String) {
+    fun addMessageListener(conversationId: String, userUid: String) {
         repository.addMessageListener(conversationId) { success, message, messageList ->
+            if (messageList != null) {
+                for(message in messageList) {
+                    if(message.senderId.equals(userUid)) {
+                        message.isSentByMe = true
+                    }
+                }
+            }
+
             addMessageListenerResult.value = GetMessageListResult(success, message, messageList)
         }
     }

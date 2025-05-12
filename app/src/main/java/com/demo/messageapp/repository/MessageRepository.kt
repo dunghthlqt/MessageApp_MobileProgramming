@@ -10,13 +10,23 @@ class MessageRepository {
 
     private var messageListener: ListenerRegistration? = null
 
-    fun sendMessage(conversationId: String, message: Message, callback: (Boolean, String?) -> Unit) {
+    fun sendMessage(conversationId: String, userUid: String, content: String, callback: (Boolean, String?) -> Unit) {
         val docRef = db.collection("conversations").document(conversationId)
 
-        docRef.update("lastMessage", message.content)
+        docRef.update("lastMessage", content)
 
-        docRef.collection("messages")
-            .add(message)
+        val messageRef = docRef.collection("messages").document()
+        val messageId = messageRef.id
+
+        val message = Message(
+            id = messageId,
+            senderId = userUid,
+            content = content,
+            timestamp = System.currentTimeMillis(),
+            type = "text"
+        )
+
+        messageRef.set(message)
             .addOnSuccessListener {
                 callback(true, null)
             }
@@ -47,7 +57,7 @@ class MessageRepository {
                 for(message in messages) {
                     val id = message.id
                     val senderId = message.getString("senderId") ?: ""
-                    val receiverId = message.getString("receiverId") ?: ""
+                    val isSentByMe = message.getBoolean("isSentByMe") ?: false
                     val content = message.getString("content") ?: ""
                     val timestamp = message.getLong("timestamp") ?: 0
                     val type = message.getString("type") ?: ""
@@ -56,7 +66,7 @@ class MessageRepository {
                     val message = Message(
                         id = id,
                         senderId = senderId,
-                        receiverId = receiverId,
+                        isSentByMe = isSentByMe,
                         content = content,
                         timestamp = timestamp,
                         type = type,
@@ -81,7 +91,7 @@ class MessageRepository {
                 for(document in querySnapshot) {
                     val id = document.id
                     val senderId = document.getString("senderId") ?: ""
-                    val receiverId = document.getString("receiverId") ?: ""
+                    val isSentByMe = document.getBoolean("isSentByMe") ?: false
                     val content = document.getString("content") ?: ""
                     val timestamp = document.getLong("timestamp") ?: 0
                     val type = document.getString("type") ?: ""
@@ -90,7 +100,7 @@ class MessageRepository {
                     val message = Message(
                         id = id,
                         senderId = senderId,
-                        receiverId = receiverId,
+                        isSentByMe = isSentByMe,
                         content = content,
                         timestamp = timestamp,
                         type = type,
@@ -121,28 +131,26 @@ class MessageRepository {
                 }
 
                 val messageList = mutableListOf<Message>()
-                for (docChange in snapshots.documentChanges) {
-                    if (docChange.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
-                        val id = docChange.document.id
-                        val senderId = docChange.document.getString("senderId") ?: ""
-                        val receiverId = docChange.document.getString("receiverId") ?: ""
-                        val content = docChange.document.getString("content") ?: ""
-                        val timestamp = docChange.document.getLong("timestamp") ?: 0
-                        val type = docChange.document.getString("type") ?: ""
-                        val deleted = docChange.document.getBoolean("deleted") ?: false
+                for (doc in snapshots.documents) {
+                    val id = doc.id
+                    val senderId = doc.getString("senderId") ?: ""
+                    val isSentByMe = doc.getBoolean("isSentByMe") ?: false
+                    val content = doc.getString("content") ?: ""
+                    val timestamp = doc.getLong("timestamp") ?: 0
+                    val type = doc.getString("type") ?: ""
+                    val deleted = doc.getBoolean("deleted") ?: false
 
-                        val message = Message(
-                            id = id,
-                            senderId = senderId,
-                            receiverId = receiverId,
-                            content = content,
-                            timestamp = timestamp,
-                            type = type,
-                            deleted = deleted
-                        )
+                    val message = Message(
+                        id = id,
+                        senderId = senderId,
+                        isSentByMe = isSentByMe,
+                        content = content,
+                        timestamp = timestamp,
+                        type = type,
+                        deleted = deleted
+                    )
 
-                        messageList.add(message)
-                    }
+                    messageList.add(message)
                 }
                 callback(true, null, messageList)
             }
