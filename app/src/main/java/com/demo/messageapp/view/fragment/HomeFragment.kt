@@ -29,6 +29,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
+        clearBackStack()
         return binding.root
     }
 
@@ -82,6 +83,16 @@ class HomeFragment : Fragment() {
         binding.btnAdd.setOnClickListener{
             findNavController().navigate(R.id.action_homeFragment_to_addMessageFragment)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        clearBackStack()
+    }
+
+    private fun clearBackStack() {
+        val navController = findNavController()
+        navController.popBackStack(R.id.homeFragment, false)
     }
 
     private fun navigateToChatFragment(conversation: Conversation) {
