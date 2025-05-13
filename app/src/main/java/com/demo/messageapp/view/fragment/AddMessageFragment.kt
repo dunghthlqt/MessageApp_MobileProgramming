@@ -77,7 +77,7 @@ class AddMessageFragment : Fragment() {
             }
         })
 
-        userViewModel.getContactsUIDListResult.observe(viewLifecycleOwner, Observer { result ->
+        userViewModel.addContactListenerResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
                 result.contactsUIDList?.let {
                     if (it.isEmpty()) {
@@ -97,7 +97,7 @@ class AddMessageFragment : Fragment() {
         authViewModel.currentUser.observe(viewLifecycleOwner, Observer { result ->
             result?.let {
                 currentUid = result.uid
-                userViewModel.getContactsUIDList(it.uid)
+                userViewModel.addContactListener(currentUid)
             }
         })
 
@@ -116,6 +116,7 @@ class AddMessageFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        userViewModel.removeContactListener()
     }
 
     override fun onStop() {

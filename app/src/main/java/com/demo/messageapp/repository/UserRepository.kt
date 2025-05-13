@@ -100,23 +100,27 @@ class UserRepository {
             .whereEqualTo("email", email)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                val document = querySnapshot.documents[0]
+                if(!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents[0]
 
-                val uid = document.id
-                val email = document.getString("email") ?: ""
-                val displayName = document.getString("displayName") ?: ""
-                val avatarUrl = document.getString("avatarUrl") ?: ""
-                val isOnline = document.getBoolean("isOnline") ?: false
+                    val uid = document.id
+                    val email = document.getString("email") ?: ""
+                    val displayName = document.getString("displayName") ?: ""
+                    val avatarUrl = document.getString("avatarUrl") ?: ""
+                    val isOnline = document.getBoolean("isOnline") ?: false
 
-                val user = User(
-                    uid = uid,
-                    email = email,
-                    displayName = displayName,
-                    avatarUrl = avatarUrl,
-                    isOnline = isOnline
-                )
+                    val user = User(
+                        uid = uid,
+                        email = email,
+                        displayName = displayName,
+                        avatarUrl = avatarUrl,
+                        isOnline = isOnline
+                    )
 
-                callback(true, null, user)
+                    callback(true, null, user)
+                } else {
+                    callback(false, null, null)
+                }
             }
             .addOnFailureListener { e ->
                 callback(false, e.message, null)
