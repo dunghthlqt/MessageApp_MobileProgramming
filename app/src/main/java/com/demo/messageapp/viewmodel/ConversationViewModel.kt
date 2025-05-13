@@ -32,14 +32,20 @@ class ConversationViewModel : ViewModel() {
     }
     fun getConversationTwoUID(uid1: String, uid2: String) {
         repository.getConversationList(uid2) {success, message, conversationList ->
-            val conversation = conversationList!!.firstOrNull { conversation ->
-                val participantIds = conversation.participantIds ?: emptyList()
+            if (conversationList != null) {
+                if(conversationList.isNotEmpty()) {
+                    val conversation = conversationList.firstOrNull { conversation ->
+                        val participantIds = conversation.participantIds ?: emptyList()
 
-                participantIds.size == 2 &&
-                        participantIds.contains(uid1) &&
-                        participantIds.contains(uid2)
+                        participantIds.size == 2 &&
+                                participantIds.contains(uid1) &&
+                                participantIds.contains(uid2)
+                    }
+                    getConversationTwoUidResult.value = GetConversationTwoUIDResult(success, message, conversation?.id)
+                } else {
+                    getConversationTwoUidResult.value = GetConversationTwoUIDResult(success, message, "")
+                }
             }
-            getConversationTwoUidResult.value = GetConversationTwoUIDResult(success, message, conversation?.id)
         }
     }
     fun resetConversationTwoUidResult() {
