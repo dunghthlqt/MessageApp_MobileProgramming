@@ -12,7 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.demo.messageapp.R
+import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.databinding.FragmentChatBinding
 import com.demo.messageapp.view.adapter.MessageAdapter
 import com.demo.messageapp.viewmodel.MessageViewModel
@@ -111,7 +111,7 @@ class ChatFragment : Fragment() {
 
         binding.btnBack.setOnClickListener {
             messageViewModel.removeMessageListener()
-            findNavController().navigate(R.id.action_chatFragment_to_homeFragment)
+            findNavController().navigateToHomeAndClearBackStack()
         }
     }
 
