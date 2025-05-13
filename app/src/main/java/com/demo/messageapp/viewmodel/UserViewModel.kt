@@ -17,6 +17,7 @@ class UserViewModel : ViewModel() {
     val updateDisplayNameResult = MutableLiveData<Pair<Boolean, String?>>()
     val getContactsUIDListResult = MutableLiveData<GetContactsUIDListResult>()
     val addNewContactResult = MutableLiveData<Pair<Boolean, String?>>()
+    val addContactListenerResult = MutableLiveData<GetContactsUIDListResult>()
 
     fun searchUserbyUid(userUid: String) {
         repository.searchUserbyUid(userUid) { success, message, user ->
@@ -60,7 +61,7 @@ class UserViewModel : ViewModel() {
     }
     fun addContactListener(userUid: String) {
         repository.addContactListener(userUid) { success, message, contactsUIDList ->
-            getContactsUIDListResult.value = GetContactsUIDListResult(success, message, contactsUIDList)
+            addContactListenerResult.value = GetContactsUIDListResult(success, message, contactsUIDList)
         }
     }
     fun removeContactListener() {

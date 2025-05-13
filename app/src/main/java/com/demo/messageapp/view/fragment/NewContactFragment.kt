@@ -6,6 +6,7 @@ import android.view.*
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.demo.messageapp.R
 import com.demo.messageapp.databinding.FragmentNewContactBinding
 import com.demo.messageapp.viewmodel.AuthViewModel
@@ -42,17 +43,25 @@ class NewContactFragment : DialogFragment() {
         authViewModel.currentUser.observe(viewLifecycleOwner, Observer { result ->
             result?.let {
                 currentUid = result.uid
-                userViewModel.getContactsUIDList(it.uid)
             }
         })
 
         authViewModel.getCurrentUser()
 
+        userViewModel.addNewContactResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.first) {
+                dismiss()
+            } else {
+                Log.d("ContactsFragment", "Error = ${result.second}")
+            }
+        })
+
         userViewModel.searchUserbyEmailResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.success) {
-                
+                userViewModel.addNewContact(currentUid, result.user!!.uid)
             } else {
-                Log.d("ContactsFragment", "Error = ${result.errorMessage}")
+                val message = binding.etName.text.toString().trim() + " is not found in Messagram yet, check input email again!"
+                MessageDialogFragment(message).show(parentFragmentManager, "MessageDialog")
             }
         })
 
