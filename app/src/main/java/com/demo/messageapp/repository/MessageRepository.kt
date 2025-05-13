@@ -125,32 +125,33 @@ class MessageRepository {
             .collection("messages")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, e ->
-                if (e != null || snapshots == null) {
-                    callback(false, "Snapshot is null", null)
+                if (e != null) {
+                    callback(false, "Error fetching messages: ${e.message}", null)
                     return@addSnapshotListener
                 }
 
                 val messageList = mutableListOf<Message>()
-                for (doc in snapshots.documents) {
-                    val id = doc.id
-                    val senderId = doc.getString("senderId") ?: ""
-                    val isSentByMe = doc.getBoolean("isSentByMe") ?: false
-                    val content = doc.getString("content") ?: ""
-                    val timestamp = doc.getLong("timestamp") ?: 0
-                    val type = doc.getString("type") ?: ""
-                    val deleted = doc.getBoolean("deleted") ?: false
+                if (snapshots != null && !snapshots.isEmpty) {
+                    for (doc in snapshots.documents) {
+                        val id = doc.id
+                        val senderId = doc.getString("senderId") ?: ""
+                        val isSentByMe = doc.getBoolean("isSentByMe") ?: false
+                        val content = doc.getString("content") ?: ""
+                        val timestamp = doc.getLong("timestamp") ?: 0
+                        val type = doc.getString("type") ?: ""
+                        val deleted = doc.getBoolean("deleted") ?: false
 
-                    val message = Message(
-                        id = id,
-                        senderId = senderId,
-                        isSentByMe = isSentByMe,
-                        content = content,
-                        timestamp = timestamp,
-                        type = type,
-                        deleted = deleted
-                    )
-
-                    messageList.add(message)
+                        val message = Message(
+                            id = id,
+                            senderId = senderId,
+                            isSentByMe = isSentByMe,
+                            content = content,
+                            timestamp = timestamp,
+                            type = type,
+                            deleted = deleted
+                        )
+                        messageList.add(message)
+                    }
                 }
                 callback(true, null, messageList)
             }
