@@ -14,6 +14,7 @@ class MessageRepository {
         val docRef = db.collection("conversations").document(conversationId)
 
         docRef.update("lastMessage", content)
+        docRef.update("lastSendTime", System.currentTimeMillis())
 
         val messageRef = docRef.collection("messages").document()
         val messageId = messageRef.id
