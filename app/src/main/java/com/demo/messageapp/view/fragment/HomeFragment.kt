@@ -16,11 +16,13 @@ import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.view.adapter.ConversationAdapter
 import com.demo.messageapp.viewmodel.AuthViewModel
 import com.demo.messageapp.viewmodel.ConversationViewModel
+import com.demo.messageapp.viewmodel.UserViewModel
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var adapter: ConversationAdapter
     private lateinit var conversationViewModel: ConversationViewModel
+    private lateinit var userViewModel: UserViewModel
     private lateinit var authViewModel: AuthViewModel
     private var currentUid: String = ""
 
@@ -35,21 +37,34 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
-        adapter = ConversationAdapter(emptyList()) { conversation ->
-            navigateToChatFragment(conversation)
-        }
+        // Khởi tạo adapter trước với danh sách rỗng
+        adapter = ConversationAdapter(
+            conversations = emptyList(),
+            currentUserUid = currentUid,  // Sẽ được cập nhật sau khi có currentUser
+            userViewModel = userViewModel,
+            onConversationClick = { conversation ->
+                navigateToChatFragment(conversation)
+            }
+        )
+
+        // Thiết lập adapter cho RecyclerView
         binding.conversationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.conversationRecyclerView.adapter = adapter
 
         authViewModel.currentUser.observe(viewLifecycleOwner, Observer { result ->
             if (result != null) {
                 currentUid = result.uid
+                // Cập nhật currentUserUid cho adapter
+                adapter.updateCurrentUserUid(currentUid)
+                conversationViewModel.getConversationList(currentUid)
             }
-            conversationViewModel.getConversationList(currentUid)
         })
 
+        authViewModel.getCurrentUser()
+        
         conversationViewModel.getConversationListResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
                 result.conversationList?.let {
@@ -67,8 +82,6 @@ class HomeFragment : Fragment() {
                 Log.d("Home", "Error = ${result.errorMessage}")
             }
         })
-
-        authViewModel.getCurrentUser()
 
         binding.btnSearch.setOnClickListener{
 

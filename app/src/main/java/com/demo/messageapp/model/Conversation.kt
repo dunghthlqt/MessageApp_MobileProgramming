@@ -6,6 +6,7 @@ data class Conversation (
     val participantIds: List<String> = listOf(),
     val createdAt: Long = 0,
     val lastMessage: String = "",
+    val lastSendTime: Long = 0,
     val deleted: Boolean = false,
     val createBy: String = ""
 )
