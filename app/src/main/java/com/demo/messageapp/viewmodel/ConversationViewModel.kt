@@ -2,9 +2,11 @@ package com.demo.messageapp.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.model.resultmodel.CreateConversationResult
 import com.demo.messageapp.model.resultmodel.GetConversationListResult
 import com.demo.messageapp.model.resultmodel.GetConversationTwoUIDResult
+import com.demo.messageapp.model.resultmodel.SearchConversationResult
 import com.demo.messageapp.repository.ConversationRepository
 
 class ConversationViewModel : ViewModel() {
@@ -14,6 +16,7 @@ class ConversationViewModel : ViewModel() {
     val deleteConversationResult = MutableLiveData<Pair<Boolean, String?>>()
     val getConversationListResult = MutableLiveData<GetConversationListResult>()
     val getConversationTwoUidResult = MutableLiveData<GetConversationTwoUIDResult>()
+    val searchConversationByUidResult = MutableLiveData<SearchConversationResult>()
     
     fun createConversation(participantIds: List<String>, conversationName: String, currentUserId: String) {
         repository.createConversation(participantIds, conversationName, currentUserId) {success, message, conversationId ->
@@ -55,5 +58,10 @@ class ConversationViewModel : ViewModel() {
             errorMessage = "",
             conversationId = ""
         )
+    }
+    fun searchConversationByUid(conversationUid: String) {
+        repository.searchConversationByUid(conversationUid) {success, message, conversation ->
+            searchConversationByUidResult.value = SearchConversationResult(success, message, conversation)
+        }
     }
 }
