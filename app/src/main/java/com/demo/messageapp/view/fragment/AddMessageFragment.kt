@@ -30,6 +30,7 @@ class AddMessageFragment : Fragment() {
     private lateinit var conversationViewModel: ConversationViewModel
     private var currentUid: String = ""
     private var conversationName: String = ""
+    private var participantIds: List<String> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,16 +52,27 @@ class AddMessageFragment : Fragment() {
         adapter = ContactsAdapter(emptyList()) { contact ->
             conversationName = ""
             conversationName = contact.displayName
+            participantIds = listOf(currentUid, contact.uid)
             conversationViewModel.getConversationTwoUID(currentUid, contact.uid)
         }
 
         binding.conversationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.conversationRecyclerView.adapter = adapter
 
+        conversationViewModel.createConversationResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.success) {
+                navigateToChatFragment(result.conversationId!!)
+            } else {
+                Log.d("ContactsFragment", "Error = ${result.errorMessage}")
+            }
+        })
+
         conversationViewModel.getConversationTwoUidResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.success) {
-                if(result != null) {
+                if(result != null && !result.conversationId.equals("")) {
                     navigateToChatFragment(result.conversationId!!)
+                } else {
+                    conversationViewModel.createConversation(participantIds, "", currentUid)
                 }
             } else {
                 Log.d("ContactsFragment", "Error = ${result.errorMessage}")
