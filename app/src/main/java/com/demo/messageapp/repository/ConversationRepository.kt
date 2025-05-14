@@ -100,6 +100,7 @@ class ConversationRepository {
                                 val id = document.id
                                 val createdAt = document.getLong("createdAt") ?: 0L
                                 val lastMessage = document.getString("lastMessage") ?: ""
+                                val lastSendTime = document.getLong("lastSendTime") ?: 0L
                                 val participantIds = document.get("participantIds") as? List<String> ?: listOf()
                                 val deleted = document.getBoolean("deleted") ?: false
                                 val conversationName = document.getString("conversationName") ?: ""
@@ -112,6 +113,7 @@ class ConversationRepository {
                                     createdAt = createdAt,
                                     participantIds = participantIds,
                                     lastMessage = lastMessage,
+                                    lastSendTime = lastSendTime,
                                     deleted = deleted,
                                     conversationName = conversationName,
                                     createBy = createBy
@@ -121,7 +123,9 @@ class ConversationRepository {
 
                             loadedCount++
                             if (loadedCount == joinedConversation.size) {
-                                callback(true, null, conversationList)
+                                // Sắp xếp danh sách theo lastSendTime giảm dần
+                                val sortedList = conversationList.sortedByDescending { it.lastSendTime }
+                                callback(true, null, sortedList)
                             }
                         }
                         .addOnFailureListener { e ->
