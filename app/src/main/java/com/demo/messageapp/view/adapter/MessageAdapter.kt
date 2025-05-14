@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.demo.messageapp.databinding.ItemMessageReceivedBinding
 import com.demo.messageapp.databinding.ItemMessageSentBinding
 import com.demo.messageapp.model.Message
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MessageAdapter(
     private var messages: List<Message>
@@ -20,7 +22,10 @@ class MessageAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(message: Message) {
-            binding.textViewMessage.text = message.content
+            if(!message.deleted) {
+                binding.textViewTime.text = formatTime(message.timestamp)
+                binding.textViewMessage.text = message.content
+            }
         }
     }
 
@@ -28,7 +33,10 @@ class MessageAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(message: Message) {
-            binding.textViewMessage.text = message.content
+            if(!message.deleted) {
+                binding.textViewTime.text = formatTime(message.timestamp)
+                binding.textViewMessage.text = message.content
+            }
         }
     }
 
@@ -74,5 +82,10 @@ class MessageAdapter(
     fun updateData(newMessages: List<Message>) {
         messages = newMessages
         notifyDataSetChanged()
+    }
+
+    private fun formatTime(millis: Long): String {
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(Date(millis))
     }
 }

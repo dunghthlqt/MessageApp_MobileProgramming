@@ -104,7 +104,7 @@ class ChatFragment : Fragment() {
         })
 
         binding.btnSend.setOnClickListener {
-            val content: String = binding.editTextMessage.text.toString()
+            val content: String = binding.editTextMessage.text.toString().trim()
 
             messageViewModel.sendMessage(conversationId!!, userUid!!, content)
         }
