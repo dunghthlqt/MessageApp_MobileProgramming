@@ -6,6 +6,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id ("androidx.navigation.safeargs.kotlin")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -64,6 +65,9 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
     implementation ("com.google.android.material:material:1.11.0")
+
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.9.0")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.9.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

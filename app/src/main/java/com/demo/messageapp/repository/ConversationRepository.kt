@@ -148,4 +148,39 @@ class ConversationRepository {
                 callback(false, e.message, null)
             }
     }
+    fun searchConversationByUid(conversationUid: String, callback: (Boolean, String?, Conversation?) -> Unit) {
+        db.collection("conversations")
+            .whereEqualTo("id", conversationUid)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val id = document.id
+                    val createdAt = document.getLong("createdAt") ?: 0L
+                    val lastMessage = document.getString("lastMessage") ?: ""
+                    val lastSendTime = document.getLong("lastSendTime") ?: 0L
+                    val participantIds = document.get("participantIds") as? List<String> ?: listOf()
+                    val deleted = document.getBoolean("deleted") ?: false
+                    val conversationName = document.getString("conversationName") ?: ""
+                    val createBy = document.getString("createBy") ?: ""
+
+                    Log.d("ConversationID", "userUid = $id")
+
+                    val conversation = Conversation(
+                        id = id,
+                        createdAt = createdAt,
+                        participantIds = participantIds,
+                        lastMessage = lastMessage,
+                        lastSendTime = lastSendTime,
+                        deleted = deleted,
+                        conversationName = conversationName,
+                        createBy = createBy
+                    )
+
+                    callback(true, null, conversation)
+                }
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message, null)
+            }
+    }
 }
