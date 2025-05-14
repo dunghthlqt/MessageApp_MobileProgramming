@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.demo.messageapp.view.fragment.HomeFragment"
+        android:label="Home">
+        <action
+            android:id="@+id/action_homeFragment_to_contactsFragment"
+            app:destination="@id/contactsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_addMessageFragment"
+            app:destination="@id/addMessageFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/contactsFragment"
+        android:name="com.demo.messageapp.view.fragment.ContactsFragment"
+        android:label="Contacts">
+        <action
+            android:id="@+id/action_contactsFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_contactsFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addMessageFragment"
+        android:name="com.demo.messageapp.view.fragment.AddMessageFragment"
+        android:label="AddMessage">
+        <action
+            android:id="@+id/action_addMessageFragment_to_homeFragment"
+            app:destination="@+id/homeFragment" />
+        <action
+            android:id="@+id/action_addMessageFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.demo.messageapp.view.fragment.ChatFragment"
+        android:label="Chat">
+        <action
+            android:id="@+id/action_chatFragment_to_homeFragment"
+            app:destination="@+id/homeFragment"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="conversationId"
+            app:argType="string" />
+        <argument
+            android:name="conversationName"
+            app:argType="string" />
+        <argument
+            android:name="userUid"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

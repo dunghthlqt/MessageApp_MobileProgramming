@@ -7,8 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.demo.messageapp.R
 import com.demo.messageapp.databinding.ItemConversationBinding
 import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.model.User

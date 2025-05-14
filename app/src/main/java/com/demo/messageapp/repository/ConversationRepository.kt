@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.viewmodel.ConversationViewModel
 import com.demo.messageapp.viewmodel.UserViewModel
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ConversationRepository {
@@ -13,6 +14,14 @@ class ConversationRepository {
     fun createConversation(participantIds: List<String>, conversationName: String, currentUserId: String, callback: (Boolean, String?, String?) -> Unit) {
         val conversationRef = db.collection("conversations").document()
         val conversationId = conversationRef.id
+
+        fun addConversationIdtoParticipants() {
+            val userRef = db.collection("users")
+            for(participantId in participantIds) {
+                userRef.document(participantId)
+                    .update("joinedConversations", FieldValue.arrayUnion(conversationId))
+            }
+        }
 
         if (conversationName.isNotEmpty()) {
             // Nếu có tên cuộc trò chuyện, tạo và lưu cuộc trò chuyện ngay lập tức
@@ -26,6 +35,7 @@ class ConversationRepository {
 
             conversationRef.set(conversation)
                 .addOnSuccessListener { _ ->
+                    addConversationIdtoParticipants()
                     callback(true, null, conversationId)
                 }
                 .addOnFailureListener { e ->
@@ -50,6 +60,7 @@ class ConversationRepository {
 
                         conversationRef.set(conversation)
                             .addOnSuccessListener { _ ->
+                                addConversationIdtoParticipants()
                                 callback(true, null, conversationId)
                             }
                             .addOnFailureListener { e ->

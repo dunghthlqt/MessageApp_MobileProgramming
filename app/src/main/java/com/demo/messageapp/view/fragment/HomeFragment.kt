@@ -64,7 +64,7 @@ class HomeFragment : Fragment() {
         })
 
         authViewModel.getCurrentUser()
-
+        
         conversationViewModel.getConversationListResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
                 result.conversationList?.let {
@@ -109,11 +109,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToChatFragment(conversation: Conversation) {
-        val action = HomeFragmentDirections.actionHomeFragmentToChatFragment(
-            conversationId = conversation.id,
-            conversationName = conversation.conversationName,
-            userUid = currentUid
-        )
-        findNavController().navigate(action)
+         val action = HomeFragmentDirections.actionHomeFragmentToChatFragment(
+             conversationId = conversation.id,
+             conversationName = conversation.conversationName,
+             userUid = currentUid
+         )
+         findNavController().navigate(action)
     }
 }

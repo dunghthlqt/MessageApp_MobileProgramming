@@ -1,85 +1,55 @@
 package com.demo.messageapp.view
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.demo.messageapp.databinding.ActivityHomeBinding
-import com.demo.messageapp.view.adapter.ConversationAdapter
-import com.demo.messageapp.viewmodel.AuthViewModel
-import com.demo.messageapp.viewmodel.ConversationViewModel
+import com.demo.messageapp.utils.UserStatusManager
+import com.google.firebase.auth.FirebaseAuth
+import android.util.Log
 
 class HomeActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityHomeBinding
-    private lateinit var adapter: ConversationAdapter
-    private lateinit var conversationViewModel: ConversationViewModel
-    private lateinit var authViewModel: AuthViewModel
+    private lateinit var userStatusManager: UserStatusManager
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
-        val toolbar: Toolbar = binding.toolbar
-        setSupportActionBar(toolbar)
+        // Khởi tạo Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
-        conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
-        authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
-
-        adapter = ConversationAdapter(emptyList()) { conversation ->
-            // TODO: Xử lý khi người dùng nhấn vào 1 cuộc trò chuyện
+        // Kiểm tra người dùng đã đăng nhập
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.e("HomeActivity", "User not logged in")
+            // TODO: Chuyển hướng về màn hình đăng nhập
+            finish()
+            return
         }
 
-        binding.conversationRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.conversationRecyclerView.adapter = adapter
+        // Khởi tạo UserStatusManager với userId
+        val userId = currentUser.uid
+        userStatusManager = UserStatusManager(userId)
 
-        var currentUid: String = ""
+        // Cập nhật trạng thái online ngay sau khi đăng nhập thành công
+        userStatusManager.setOnline()
 
-        authViewModel.currentUser.observe(this, Observer { result ->
-            if (result != null) {
-                currentUid = result.uid
+        // Theo dõi vòng đời Activity
+        lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_START)
+            fun onStart() {
+                userStatusManager.setOnline()
             }
-            conversationViewModel.getConversationList(currentUid)
-        })
 
-        conversationViewModel.getConversationListResult.observe(this, Observer { result ->
-            if (result.success) {
-                result.conversationList?.let {
-                    if (it.isEmpty()) {
-                        binding.conversationRecyclerView.visibility = View.GONE
-                        binding.noMessagesTextView.visibility = View.VISIBLE
-                    } else {
-                        binding.conversationRecyclerView.visibility = View.VISIBLE
-                        binding.noMessagesTextView.visibility = View.GONE
-
-                        adapter.updateData(result.conversationList)
-                    }
-                }
-            } else {
-                Log.d("Home", "Error = ${result.errorMessage}")
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            fun onStop() {
+                userStatusManager.setOffline()
             }
         })
-
-        authViewModel.getCurrentUser()
-
-        binding.btnSearch.setOnClickListener{
-            Toast.makeText(this, "Search clicked", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, SearchActivity::class.java)
-            startActivity(intent)
-        }
-        binding.btnContacts.setOnClickListener{
-            Toast.makeText(this, "Contacts clicked", Toast.LENGTH_SHORT).show()
-        }
-        binding.btnSetting.setOnClickListener{
-            Toast.makeText(this, "Setting clicked", Toast.LENGTH_SHORT).show()
-        }
     }
 }
