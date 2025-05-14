@@ -2,4 +2,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <corners android:radius="10dp" /> <!-- Điều chỉnh giá trị radius để thay đổi độ bo góc -->
     <solid android:color="@android:color/transparent" />
+    <solid android:color="#E0E0E0" />
 </shape>

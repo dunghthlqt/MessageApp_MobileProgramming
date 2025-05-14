@@ -15,7 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.databinding.FragmentChatBinding
 import com.demo.messageapp.view.adapter.MessageAdapter
+import com.demo.messageapp.viewmodel.ConversationViewModel
 import com.demo.messageapp.viewmodel.MessageViewModel
+import com.demo.messageapp.viewmodel.UserViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class ChatFragment : Fragment() {
 
@@ -24,6 +30,8 @@ class ChatFragment : Fragment() {
 
     private lateinit var adapter: MessageAdapter
     private lateinit var messageViewModel: MessageViewModel
+    private lateinit var conversationViewModel: ConversationViewModel
+    private lateinit var userViewModel: UserViewModel
     private lateinit var layoutManager: LinearLayoutManager
 
     private var conversationId: String? = null
@@ -42,6 +50,8 @@ class ChatFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         messageViewModel = ViewModelProvider(requireActivity())[MessageViewModel::class.java]
+        conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         adapter = MessageAdapter(emptyList())
 
@@ -69,6 +79,40 @@ class ChatFragment : Fragment() {
             binding.textViewReceiverName.text = conversationName
             messageViewModel.addMessageListener(conversationId!!, userUid!!)
         }
+
+        conversationViewModel.searchConversationByUid(conversationId!!)
+
+        conversationViewModel.searchConversationByUidResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.success) {
+                val otherUserId = result.conversation?.participantIds?.firstOrNull { it != userUid }
+                if (otherUserId != null) {
+                    userViewModel.searchUserbyUid(otherUserId)
+                }
+            } else {
+                Log.d("Home", "Error = ${result.errorMessage}")
+            }
+        })
+
+        userViewModel.searchUserbyUidResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.success) {
+                if(result.user != null) {
+                    binding.textViewReceiverName.text = result.user.displayName
+                    if(result.user.isOnline) {
+                        if(result.user.lastSeen < System.currentTimeMillis() && result.user.lastSeen > (System.currentTimeMillis() - 180000)) {
+                            binding.textViewStatus.text = "Online"
+                        } else {
+                            binding.textViewStatus.text = formatTime(result.user.lastSeen)
+                        }
+                    } else {
+                        binding.textViewStatus.text = formatTime(result.user.lastSeen)
+                        Log.d("Home", "Error = ${result.user.displayName}")
+                        Log.d("Home", "Error = ${result.user.lastSeen}")
+                    }
+                }
+            } else {
+                Log.d("Home", "Error = ${result.errorMessage}")
+            }
+        })
 
         messageViewModel.addMessageListenerResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
@@ -131,5 +175,36 @@ class ChatFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun formatTime(millis: Long): String {
+        val calendar = Calendar.getInstance()
+        calendar.time = Date(millis)
+
+        // Lấy ngày hiện tại (00:00:00.000)
+        val todayCal = Calendar.getInstance()
+        todayCal.set(Calendar.HOUR_OF_DAY, 0)
+        todayCal.set(Calendar.MINUTE, 0)
+        todayCal.set(Calendar.SECOND, 0)
+        todayCal.set(Calendar.MILLISECOND, 0)
+
+        // Lấy ngày của thời điểm đầu vào (00:00:00.000)
+        val inputCal = Calendar.getInstance()
+        inputCal.time = Date(millis)
+        inputCal.set(Calendar.HOUR_OF_DAY, 0)
+        inputCal.set(Calendar.MINUTE, 0)
+        inputCal.set(Calendar.SECOND, 0)
+        inputCal.set(Calendar.MILLISECOND, 0)
+
+        val isToday = todayCal.timeInMillis == inputCal.timeInMillis
+
+        val sdf = if (isToday) {
+            SimpleDateFormat("HH:mm", Locale.getDefault())
+        } else {
+            SimpleDateFormat("dd MM 'at' HH:mm", Locale.getDefault())
+        }
+
+        val formattedTime = sdf.format(Date(millis))
+        return "last sent ${if (isToday) "at " else ""}$formattedTime"
     }
 }

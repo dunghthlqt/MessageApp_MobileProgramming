@@ -6,6 +6,7 @@ data class User (
     val displayName: String = "",
     val avatarUrl: String = "",
     val isOnline: Boolean = false,
+    val lastSeen: Long = 0,
     val joinedConversation: List<String> = listOf(),
     val contatcs: List<String> = listOf()
 )
