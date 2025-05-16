@@ -1,10 +1,7 @@
 package com.demo.messageapp.repository
 
 import android.util.Log
-import androidx.lifecycle.ViewModelProvider
 import com.demo.messageapp.model.Conversation
-import com.demo.messageapp.viewmodel.ConversationViewModel
-import com.demo.messageapp.viewmodel.UserViewModel
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -72,14 +69,35 @@ class ConversationRepository {
         }
     }
     fun deleteConversation(conversationId: String, callback: (Boolean, String?) -> Unit) {
-        db.collection("conversations")
-            .document(conversationId)
-            .update("deleted", true)
-            .addOnSuccessListener { _ ->
-                callback(true, null)
+        val userRef = db.collection("users")
+        val conversationRef = db.collection("conversations")
+
+        conversationRef.document(conversationId)
+            .get()
+            .addOnSuccessListener { document ->
+                val participantIds = document.get("participantIds") as? List<String>
+
+                if (participantIds != null) {
+                    for(participantId in participantIds) {
+                        userRef.document(participantId)
+                            .update("joinedConversations", FieldValue.arrayRemove(conversationId))
+                            .addOnFailureListener { e ->
+                                callback(false, e.message)
+                            }
+                    }
+
+                    conversationRef.document(conversationId)
+                        .update("deleted", true)
+                        .addOnSuccessListener { _ ->
+                            callback(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            callback(false, e.message)
+                        }
+                }
             }
-            .addOnFailureListener { task ->
-                callback(false, task.message)
+            .addOnFailureListener { e ->
+                callback(false, e.message)
             }
     }
 
@@ -93,7 +111,7 @@ class ConversationRepository {
             .addOnSuccessListener { document ->
                 val joinedConversation = document.get("joinedConversations") as? List<String>
 
-                if (joinedConversation == null || joinedConversation.isEmpty()) {
+                if (joinedConversation.isNullOrEmpty()) {
                     Log.d("ConversationRepository", "Error")
                     callback(true, null, emptyList())
                     return@addOnSuccessListener
@@ -179,6 +197,88 @@ class ConversationRepository {
             }
             .addOnFailureListener { e ->
                 callback(false, e.message, null)
+            }
+    }
+    fun addConversationListener(userUid: String, callback: (Boolean, String?, List<Conversation>?) -> Unit) {
+        val userCollection = db.collection("users")
+
+        Log.d("ConversationRepository", "userUid = $userUid")
+
+        // Lắng nghe thay đổi của tài liệu người dùng
+        userCollection.document(userUid)
+            .addSnapshotListener { document, userError ->
+                if (userError != null) {
+                    callback(false, userError.message, null)
+                    return@addSnapshotListener
+                }
+
+                if (document == null || !document.exists()) {
+                    Log.d("ConversationRepository", "Document not found")
+                    callback(true, null, emptyList())
+                    return@addSnapshotListener
+                }
+
+                val joinedConversation = document.get("joinedConversations") as? List<String>
+
+                if (joinedConversation.isNullOrEmpty()) {
+                    Log.d("ConversationRepository", "No conversations found")
+                    callback(true, null, emptyList())
+                    return@addSnapshotListener
+                }
+
+                val conversationList = mutableListOf<Conversation>()
+                var loadedCount = 0
+
+                // Lắng nghe từng cuộc trò chuyện
+                for (conversationId in joinedConversation) {
+                    val conversationCollection = db.collection("conversations")
+                    conversationCollection.whereEqualTo("id", conversationId)
+                        .addSnapshotListener { documents, conversationError ->
+                            if (conversationError != null) {
+                                callback(false, conversationError.message, null)
+                                return@addSnapshotListener
+                            }
+
+                            conversationList.removeAll { it.id == conversationId } // Xóa cuộc trò chuyện cũ nếu có
+
+                            for (document in documents!!) {
+                                val deleted = document.getBoolean("deleted") ?: false
+                                if(!deleted) {
+                                    val id = document.id
+                                    val createdAt = document.getLong("createdAt") ?: 0L
+                                    val lastMessage = document.getString("lastMessage") ?: ""
+                                    val lastSendTime = document.getLong("lastSendTime") ?: 0L
+                                    val participantIds = document.get("participantIds") as? List<String> ?: listOf()
+                                    val deleted = document.getBoolean("deleted") ?: false
+                                    val conversationName = document.getString("conversationName") ?: ""
+                                    val createBy = document.getString("createBy") ?: ""
+
+                                    Log.d("ConversationID", "userUid = $id")
+
+                                    val conversation = Conversation(
+                                        id = id,
+                                        createdAt = createdAt,
+                                        participantIds = participantIds,
+                                        lastMessage = lastMessage,
+                                        lastSendTime = lastSendTime,
+                                        deleted = deleted,
+                                        conversationName = conversationName,
+                                        createBy = createBy
+                                    )
+                                    conversationList.add(conversation)
+                                } else {
+                                    break
+                                }
+                            }
+
+                            loadedCount++
+                            if (loadedCount == joinedConversation.size) {
+                                // Sắp xếp danh sách theo lastSendTime giảm dần
+                                val sortedList = conversationList.sortedByDescending { it.lastSendTime }
+                                callback(true, null, sortedList)
+                            }
+                        }
+                }
             }
     }
 }
