@@ -13,9 +13,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.databinding.FragmentChatBinding
 import com.demo.messageapp.view.adapter.MessageAdapter
+import com.demo.messageapp.view.dialog.ConversationOptionsDialog
 import com.demo.messageapp.viewmodel.ConversationViewModel
 import com.demo.messageapp.viewmodel.MessageViewModel
 import com.demo.messageapp.viewmodel.UserViewModel
@@ -111,6 +113,11 @@ class ChatFragment : Fragment() {
         userViewModel.searchUserbyUidResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.success) {
                 if(result.user != null) {
+                    context?.let {
+                        Glide.with(it)
+                            .load(result.user.avatarUrl)
+                            .into(binding.imageViewProfilePic)
+                    }
                     binding.textViewReceiverName.text = result.user.displayName
                     if(result.user.isOnline) {
                         if(result.user.lastSeen < System.currentTimeMillis() && result.user.lastSeen > (System.currentTimeMillis() - 180000)) {
@@ -136,7 +143,9 @@ class ChatFragment : Fragment() {
                         binding.messageRecyclerView.visibility = View.VISIBLE
 
                         adapter.updateData(result.messageList)
-                        scrollToBottom()
+                        if (isNearBottom()) {
+                            scrollToBottom()
+                        }
                     }
                 }
             } else {
@@ -160,9 +169,7 @@ class ChatFragment : Fragment() {
 
         binding.editTextMessage.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
             override fun afterTextChanged(s: Editable?) {
                 binding.btnSend.visibility = if (s.isNullOrBlank()) View.GONE else View.VISIBLE
             }
@@ -170,13 +177,22 @@ class ChatFragment : Fragment() {
 
         binding.btnSend.setOnClickListener {
             val content: String = binding.editTextMessage.text.toString().trim()
-
             messageViewModel.sendMessage(conversationId!!, userUid!!, content)
         }
 
         binding.btnBack.setOnClickListener {
             messageViewModel.removeMessageListener()
             findNavController().navigateToHomeAndClearBackStack()
+        }
+
+        binding.btnMore.setOnClickListener {
+            val dialog = ConversationOptionsDialog(
+                context = requireContext(),
+                onDeleteListener = {
+                    conversationViewModel.deleteConversation(conversationId!!)
+                }
+            )
+            dialog.show()
         }
     }
 
@@ -195,6 +211,7 @@ class ChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        messageViewModel.removeMessageListener()
         _binding = null
     }
 
