@@ -17,6 +17,7 @@ class ConversationViewModel : ViewModel() {
     val getConversationListResult = MutableLiveData<GetConversationListResult>()
     val getConversationTwoUidResult = MutableLiveData<GetConversationTwoUIDResult>()
     val searchConversationByUidResult = MutableLiveData<SearchConversationResult>()
+    val addConversationListenerResult = MutableLiveData<GetConversationListResult>()
     
     fun createConversation(participantIds: List<String>, conversationName: String, currentUserId: String) {
         repository.createConversation(participantIds, conversationName, currentUserId) {success, message, conversationId ->
@@ -62,6 +63,11 @@ class ConversationViewModel : ViewModel() {
     fun searchConversationByUid(conversationUid: String) {
         repository.searchConversationByUid(conversationUid) {success, message, conversation ->
             searchConversationByUidResult.value = SearchConversationResult(success, message, conversation)
+        }
+    }
+    fun addConversationListener(userUid: String) {
+        repository.addConversationListener(userUid) {success, message, conversationList ->
+            addConversationListenerResult.value = GetConversationListResult(success, message, conversationList)
         }
     }
 }
