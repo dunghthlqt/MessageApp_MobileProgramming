@@ -15,6 +15,7 @@ class MessageViewModel : ViewModel() {
     val getMessageListResult = MutableLiveData<GetMessageListResult>()
     val searchMessageResult = MutableLiveData<SearchMessageResult>()
     val addMessageListenerResult = MutableLiveData<GetMessageListResult>()
+    val addReactionResult = MutableLiveData<Pair<Boolean, String?>>()
 
     fun sendMessage(conversationId: String, userUid: String, content: String) {
 
@@ -25,6 +26,11 @@ class MessageViewModel : ViewModel() {
     fun deleteMessage(conversationId: String, messageId: String) {
         repository.deleteMessage(conversationId, messageId) { success, message ->
             deleteMessageResult.value = Pair(success, message)
+        }
+    }
+    fun addReaction(conversationId: String, messageId: String, emoji: String, userUid: String) {
+        repository.addReaction(conversationId, messageId, emoji, userUid) { success, message ->
+            addReactionResult.value = Pair(success, message)
         }
     }
     fun getMessageList(conversationId: String) {

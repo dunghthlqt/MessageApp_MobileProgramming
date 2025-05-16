@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -53,7 +54,21 @@ class ChatFragment : Fragment() {
         conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
-        adapter = MessageAdapter(emptyList())
+        adapter = MessageAdapter(
+            messages = emptyList(),
+            context = requireContext(),
+            userUid = userUid ?: "",
+            onReplyListener = { message ->
+                // TODO: Xử lý reply, ví dụ: mở giao diện trả lời
+                Toast.makeText(requireContext(), "Reply to: ${message.content}", Toast.LENGTH_SHORT).show()
+            },
+            onDeleteListener = { message ->
+                messageViewModel.deleteMessage(conversationId!!, message.id)
+            },
+            onReactionAddedListener = { message, emoji ->
+                messageViewModel.addReaction(conversationId!!, message.id, emoji, userUid!!)
+            }
+        )
 
         // Thay đổi: lưu layoutManager vào biến để sử dụng sau này
         layoutManager = LinearLayoutManager(requireContext())
@@ -105,8 +120,6 @@ class ChatFragment : Fragment() {
                         }
                     } else {
                         binding.textViewStatus.text = formatTime(result.user.lastSeen)
-                        Log.d("Home", "Error = ${result.user.displayName}")
-                        Log.d("Home", "Error = ${result.user.lastSeen}")
                     }
                 }
             } else {
@@ -128,6 +141,14 @@ class ChatFragment : Fragment() {
                 }
             } else {
                 Log.d("Home", "Error = ${result.errorMessage}")
+            }
+        })
+
+        messageViewModel.addReactionResult.observe(viewLifecycleOwner, Observer { result ->
+            if (result.first) {
+                Toast.makeText(requireContext(), "Reaction added", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Error: ${result.second}", Toast.LENGTH_SHORT).show()
             }
         })
 

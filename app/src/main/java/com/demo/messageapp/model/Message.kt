@@ -7,5 +7,11 @@ data class Message(
     val content: String = "",
     val timestamp: Long = 0,
     val type: String = "",
-    val deleted: Boolean = false
+    val deleted: Boolean = false,
+    var reactions: List<Reaction> = listOf()
+)
+
+data class Reaction(
+    val emoji: String,
+    val userId: String
 )
