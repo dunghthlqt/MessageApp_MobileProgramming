@@ -37,6 +37,19 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Hello World" />
 
+            <LinearLayout
+                android:id="@+id/reactionsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewMessage">
+
+                <!-- Reactions sẽ được thêm động trong code -->
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/textViewTime"
                 android:layout_width="wrap_content"

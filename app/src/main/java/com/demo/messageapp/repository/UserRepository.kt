@@ -23,13 +23,15 @@ class UserRepository {
                     val displayName = document.getString("displayName") ?: ""
                     val avatarUrl = document.getString("avatarUrl") ?: ""
                     val isOnline = document.getBoolean("isOnline") ?: false
+                    val lastSeen = document.getLong("lastSeen") ?: 0
 
                     val user = User(
                         uid = uid,
                         email = email,
                         displayName = displayName,
                         avatarUrl = avatarUrl,
-                        isOnline = isOnline
+                        isOnline = isOnline,
+                        lastSeen = lastSeen
                     )
 
                     callback(true, null, user)
@@ -51,13 +53,15 @@ class UserRepository {
                     val displayName = user.getString("displayName") ?: ""
                     val avatarUrl = user.getString("avatarUrl") ?: ""
                     val isOnline = user.getBoolean("isOnline") ?: false
+                    val lastSeen = user.getLong("lastSeen") ?: 0
 
                     val userr = User(
                         uid = uid,
                         email = email,
                         displayName = displayName,
                         avatarUrl = avatarUrl,
-                        isOnline = isOnline
+                        isOnline = isOnline,
+                        lastSeen = lastSeen
                     )
 
                     userList.add(userr)
@@ -80,13 +84,15 @@ class UserRepository {
                 val displayName = document.getString("displayName") ?: ""
                 val avatarUrl = document.getString("avatarUrl") ?: ""
                 val isOnline = document.getBoolean("isOnline") ?: false
+                val lastSeen = document.getLong("lastSeen") ?: 0
 
                 val user = User(
                     uid = uid,
                     email = email,
                     displayName = displayName,
                     avatarUrl = avatarUrl,
-                    isOnline = isOnline
+                    isOnline = isOnline,
+                    lastSeen = lastSeen
                 )
 
                 callback(true, null, user)
@@ -108,13 +114,15 @@ class UserRepository {
                     val displayName = document.getString("displayName") ?: ""
                     val avatarUrl = document.getString("avatarUrl") ?: ""
                     val isOnline = document.getBoolean("isOnline") ?: false
+                    val lastSeen = document.getLong("lastSeen") ?: 0
 
                     val user = User(
                         uid = uid,
                         email = email,
                         displayName = displayName,
                         avatarUrl = avatarUrl,
-                        isOnline = isOnline
+                        isOnline = isOnline,
+                        lastSeen = lastSeen
                     )
 
                     callback(true, null, user)

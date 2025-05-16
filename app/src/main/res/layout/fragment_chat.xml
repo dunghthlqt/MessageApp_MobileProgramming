@@ -34,7 +34,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_call"
             app:layout_constraintStart_toEndOf="@id/imageViewProfilePic"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -74,12 +74,37 @@
             android:layout_height="40dp"
             android:background="@drawable/rounded_image"
             android:clipToOutline="true"
-            android:src="@drawable/ic_user_avatar"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.185"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btn_more"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            app:tint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/more" />
+
+        <ImageButton
+            android:id="@+id/btn_call"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            app:layout_constraintEnd_toStartOf="@+id/btn_more"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/call" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

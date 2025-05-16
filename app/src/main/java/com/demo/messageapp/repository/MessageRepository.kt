@@ -1,6 +1,8 @@
 package com.demo.messageapp.repository
 
 import com.demo.messageapp.model.Message
+import com.demo.messageapp.model.Reaction
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -46,6 +48,20 @@ class MessageRepository {
             }
             .addOnFailureListener { task ->
                 callback(false, task.message)
+            }
+    }
+    fun addReaction(conversationId: String, messageId: String, emoji: String, userUid: String, callback: (Boolean, String?) -> Unit) {
+        val reaction = Reaction(emoji = emoji, userId = userUid)
+        db.collection("conversations")
+            .document(conversationId)
+            .collection("messages")
+            .document(messageId)
+            .update("reactions", FieldValue.arrayUnion(reaction))
+            .addOnSuccessListener {
+                callback(true, null)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message)
             }
     }
     fun getMessageList(conversationId: String, callback: (Boolean, String?, List<Message>?) -> Unit) {
@@ -141,6 +157,15 @@ class MessageRepository {
                         val timestamp = doc.getLong("timestamp") ?: 0
                         val type = doc.getString("type") ?: ""
                         val deleted = doc.getBoolean("deleted") ?: false
+                        val reactions = mutableListOf<Reaction>()
+                        val reactionsData = doc.get("reactions") as? List<Map<String, Any>> ?: emptyList()
+                        reactionsData.forEach { reactionMap ->
+                            val emoji = reactionMap["emoji"] as? String ?: ""
+                            val userId = reactionMap["userId"] as? String ?: ""
+                            if (emoji.isNotEmpty() && userId.isNotEmpty()) {
+                                reactions.add(Reaction(emoji = emoji, userId = userId))
+                            }
+                        }
 
                         val message = Message(
                             id = id,
@@ -149,7 +174,8 @@ class MessageRepository {
                             content = content,
                             timestamp = timestamp,
                             type = type,
-                            deleted = deleted
+                            deleted = deleted,
+                            reactions = reactions.toList()
                         )
                         messageList.add(message)
                     }
