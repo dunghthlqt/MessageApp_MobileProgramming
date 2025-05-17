@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.databinding.FragmentChatBinding
+import com.demo.messageapp.model.ReplyInfo
 import com.demo.messageapp.view.adapter.MessageAdapter
 import com.demo.messageapp.view.dialog.ConversationOptionsDialog
 import com.demo.messageapp.viewmodel.ConversationViewModel
@@ -40,6 +41,10 @@ class ChatFragment : Fragment() {
     private var conversationId: String? = null
     private var conversationName: String? = null
     private var userUid: String? = null
+    private var userName: String? = null
+    private var anotherUid: String = ""
+    private var anotherName: String? = null
+    private var originalMessageId: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,53 +57,64 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize ViewModels
         messageViewModel = ViewModelProvider(requireActivity())[MessageViewModel::class.java]
         conversationViewModel = ViewModelProvider(this)[ConversationViewModel::class.java]
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
+        // Handle arguments
+        arguments?.let {
+            conversationId = it.getString("conversationId")
+            conversationName = it.getString("conversationName")
+            userUid = it.getString("userUid")
+
+            userUid?.let {
+                userViewModel.getUserNameByUid(it) { name ->
+                    userName = name
+                }
+            }
+
+            binding.textViewReceiverName.text = conversationName
+            messageViewModel.addMessageListener(conversationId!!, userUid!!)
+        }
+
+        // Setup RecyclerView and Adapter
         adapter = MessageAdapter(
             messages = emptyList(),
             context = requireContext(),
             userUid = userUid ?: "",
+            userViewModel = userViewModel,
             onReplyListener = { message ->
-                // TODO: Xử lý reply, ví dụ: mở giao diện trả lời
-                Toast.makeText(requireContext(), "Reply to: ${message.content}", Toast.LENGTH_SHORT).show()
+                binding.replyPreview.replyPreviewText.text = message.content
+                originalMessageId = message.id
+                if(message.isSentByMe) {
+                    binding.replyPreview.replySenderName.text = userName
+                } else {
+                    binding.replyPreview.replySenderName.text = anotherName
+                }
+                binding.replyPreview.root.visibility = View.VISIBLE
             },
             onDeleteListener = { message ->
                 messageViewModel.deleteMessage(conversationId!!, message.id)
             },
             onReactionAddedListener = { message, emoji ->
                 messageViewModel.addReaction(conversationId!!, message.id, emoji, userUid!!)
+            },
+            onOriginalMessageClickedListener = { originalMessageId ->
+                val position = adapter.getMessages().indexOfFirst { it.id == originalMessageId }
+                if (position != -1) {
+                    binding.messageRecyclerView.smoothScrollToPosition(position)
+                }
             }
         )
 
-        // Thay đổi: lưu layoutManager vào biến để sử dụng sau này
         layoutManager = LinearLayoutManager(requireContext())
-        layoutManager.stackFromEnd = true // Đảm bảo tin nhắn mới sẽ ở dưới cùng
-
+        layoutManager.stackFromEnd = true
         binding.messageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.messageRecyclerView.adapter = adapter
 
-        // Thêm: Lắng nghe sự thay đổi kích thước (khi bàn phím xuất hiện)
-        binding.messageRecyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
-            if (bottom < oldBottom) {
-                binding.messageRecyclerView.post {
-                    scrollToBottom()
-                }
-            }
-        }
-
-        arguments?.let {
-            conversationId = it.getString("conversationId")
-            conversationName = it.getString("conversationName")
-            userUid = it.getString("userUid")
-
-            binding.textViewReceiverName.text = conversationName
-            messageViewModel.addMessageListener(conversationId!!, userUid!!)
-        }
-
+        // Setup Observers
         conversationViewModel.searchConversationByUid(conversationId!!)
-
         conversationViewModel.searchConversationByUidResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.success) {
                 val otherUserId = result.conversation?.participantIds?.firstOrNull { it != userUid }
@@ -118,7 +134,9 @@ class ChatFragment : Fragment() {
                             .load(result.user.avatarUrl)
                             .into(binding.imageViewProfilePic)
                     }
-                    binding.textViewReceiverName.text = result.user.displayName
+                    anotherUid = result.user.uid
+                    anotherName = result.user.displayName
+                    binding.textViewReceiverName.text = anotherName
                     if(result.user.isOnline) {
                         if(result.user.lastSeen < System.currentTimeMillis() && result.user.lastSeen > (System.currentTimeMillis() - 180000)) {
                             binding.textViewStatus.text = "Online"
@@ -128,6 +146,7 @@ class ChatFragment : Fragment() {
                     } else {
                         binding.textViewStatus.text = formatTime(result.user.lastSeen)
                     }
+                    binding.messageRecyclerView.visibility = View.VISIBLE
                 }
             } else {
                 Log.d("Home", "Error = ${result.errorMessage}")
@@ -140,12 +159,8 @@ class ChatFragment : Fragment() {
                     if (it.isEmpty()) {
                         binding.messageRecyclerView.visibility = View.GONE
                     } else {
-                        binding.messageRecyclerView.visibility = View.VISIBLE
-
                         adapter.updateData(result.messageList)
-                        if (isNearBottom()) {
-                            scrollToBottom()
-                        }
+                        scrollToBottom()
                     }
                 }
             } else {
@@ -164,8 +179,18 @@ class ChatFragment : Fragment() {
         messageViewModel.sendMessageResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.first) {
                 binding.editTextMessage.setText("")
+                binding.replyPreview.root.visibility = View.GONE
             }
         })
+
+        // Setup Listeners
+        binding.messageRecyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            if (bottom < oldBottom) {
+                binding.messageRecyclerView.post {
+                    scrollToBottom()
+                }
+            }
+        }
 
         binding.editTextMessage.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -177,7 +202,24 @@ class ChatFragment : Fragment() {
 
         binding.btnSend.setOnClickListener {
             val content: String = binding.editTextMessage.text.toString().trim()
-            messageViewModel.sendMessage(conversationId!!, userUid!!, content)
+            if(binding.replyPreview.root.visibility == View.VISIBLE) {
+                val replyContent = binding.replyPreview.replyPreviewText.text.toString()
+                if(binding.replyPreview.replySenderName.text.equals(anotherName)) {
+                    val reply = ReplyInfo(originalMessageId, anotherUid, replyContent)
+                    messageViewModel.sendReplyMessage(conversationId!!, userUid!!, content, reply)
+                } else {
+                    val reply = userUid?.let { it1 ->
+                        ReplyInfo(originalMessageId, it1, replyContent)
+                    }
+                    Log.d("Chat", "2")
+                    Log.d("Chat", "$userUid")
+                    if (reply != null) {
+                        messageViewModel.sendReplyMessage(conversationId!!, userUid!!, content, reply)
+                    }
+                }
+            } else {
+                messageViewModel.sendMessage(conversationId!!, userUid!!, content)
+            }
         }
 
         binding.btnBack.setOnClickListener {
@@ -190,9 +232,15 @@ class ChatFragment : Fragment() {
                 context = requireContext(),
                 onDeleteListener = {
                     conversationViewModel.deleteConversation(conversationId!!)
+                    messageViewModel.removeMessageListener()
+                    findNavController().navigateToHomeAndClearBackStack()
                 }
             )
             dialog.show()
+        }
+
+        binding.replyPreview.btnCancelReply.setOnClickListener {
+            binding.replyPreview.root.visibility = View.GONE
         }
     }
 

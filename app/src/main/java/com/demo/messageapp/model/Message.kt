@@ -8,10 +8,17 @@ data class Message(
     val timestamp: Long = 0,
     val type: String = "",
     val deleted: Boolean = false,
-    var reactions: List<Reaction> = listOf()
+    var reactions: List<Reaction> = listOf(),
+    val replyInfo: ReplyInfo? = null
 )
 
 data class Reaction(
     val emoji: String,
     val userId: String
+)
+
+data class ReplyInfo(
+    val originalMessageId: String,
+    val originalSenderId: String,
+    val replyContent: String
 )

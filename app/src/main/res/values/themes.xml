@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.MessageApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimari</item>
-        <item name="colorSecondary">@color/whilegray</item>
-        <item name="android:windowBackground">@color/whilegray</item>
+        <item name="colorPrimary">#527DA3</item>
+        <item name="colorSecondary">#527DA3</item>
+        <item name="android:windowBackground">#527DA3</item>
 
     </style>
 

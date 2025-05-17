@@ -1,5 +1,6 @@
 package com.demo.messageapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.demo.messageapp.model.resultmodel.GetUserListResult
@@ -66,5 +67,14 @@ class UserViewModel : ViewModel() {
     }
     fun removeContactListener() {
         repository.removeContactListener()
+    }
+    fun getUserNameByUid(userUid: String, callback: (String?) -> Unit) {
+        repository.searchUserbyUid(userUid) { success, message, user ->
+            if (success && user != null) {
+                callback(user.displayName)
+            } else {
+                callback(null)
+            }
+        }
     }
 }

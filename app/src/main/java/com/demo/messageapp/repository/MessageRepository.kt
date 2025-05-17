@@ -1,7 +1,9 @@
 package com.demo.messageapp.repository
 
+import android.util.Log
 import com.demo.messageapp.model.Message
 import com.demo.messageapp.model.Reaction
+import com.demo.messageapp.model.ReplyInfo
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -27,6 +29,32 @@ class MessageRepository {
             content = content,
             timestamp = System.currentTimeMillis(),
             type = "text"
+        )
+
+        messageRef.set(message)
+            .addOnSuccessListener {
+                callback(true, null)
+            }
+            .addOnFailureListener { e ->
+                callback(false, e.message)
+            }
+    }
+    fun sendReplyMessage(conversationId: String, userUid: String, content: String, reply: ReplyInfo, callback: (Boolean, String?) -> Unit) {
+        val docRef = db.collection("conversations").document(conversationId)
+
+        docRef.update("lastMessage", content)
+        docRef.update("lastSendTime", System.currentTimeMillis())
+
+        val messageRef = docRef.collection("messages").document()
+        val messageId = messageRef.id
+
+        val message = Message(
+            id = messageId,
+            senderId = userUid,
+            content = content,
+            timestamp = System.currentTimeMillis(),
+            type = "text",
+            replyInfo = reply
         )
 
         messageRef.set(message)
@@ -166,6 +194,16 @@ class MessageRepository {
                                 reactions.add(Reaction(emoji = emoji, userId = userId))
                             }
                         }
+                        val replyInfoMap = doc.get("replyInfo") as? Map<String, Any>
+                        val replyInfo = if (replyInfoMap != null) {
+                            ReplyInfo(
+                                originalMessageId = replyInfoMap["originalMessageId"] as String,
+                                originalSenderId = replyInfoMap["originalSenderId"] as String,
+                                replyContent = replyInfoMap["replyContent"] as String
+                            )
+                        } else {
+                            null
+                        }
 
                         val message = Message(
                             id = id,
@@ -175,7 +213,8 @@ class MessageRepository {
                             timestamp = timestamp,
                             type = type,
                             deleted = deleted,
-                            reactions = reactions.toList()
+                            reactions = reactions.toList(),
+                            replyInfo = replyInfo
                         )
                         messageList.add(message)
                     }
