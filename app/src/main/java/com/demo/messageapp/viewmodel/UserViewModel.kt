@@ -1,5 +1,7 @@
 package com.demo.messageapp.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +9,7 @@ import com.demo.messageapp.model.resultmodel.GetUserListResult
 import com.demo.messageapp.model.resultmodel.SearchUserResult
 import com.demo.messageapp.model.resultmodel.GetContactsUIDListResult
 import com.demo.messageapp.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 
 class UserViewModel : ViewModel() {
     private val repository = UserRepository()
@@ -75,6 +78,11 @@ class UserViewModel : ViewModel() {
             } else {
                 callback(null)
             }
+        }
+    }
+    fun updateUserProfile(displayName: String, imageUri: Uri?, context: Context, callback: (Boolean, String?) -> Unit) {
+        repository.updateUserProfile(displayName, imageUri, context) { success, message ->
+            callback(success, message)
         }
     }
 }

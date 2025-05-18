@@ -1,12 +1,15 @@
 package com.demo.messageapp.view.adapter
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.demo.messageapp.databinding.ItemConversationBinding
 import com.demo.messageapp.model.Conversation
 import com.demo.messageapp.model.User
@@ -21,6 +24,7 @@ import java.util.Locale
 class ConversationAdapter(
     private var conversations: List<Conversation>,
     private var currentUserUid: String,
+    private val context: Context,
     private val userViewModel: UserViewModel,
     private val onConversationClick: (Conversation) -> Unit
 ) : RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder>() {
@@ -54,6 +58,9 @@ class ConversationAdapter(
                         // Tạo observer mới với tag position để có thể quản lý
                         val observer = Observer<SearchUserResult> { result ->
                             if (result.success && result.user?.uid == otherUserId) {
+                                Glide.with(context)
+                                    .load(result.user.avatarUrl)
+                                    .into(binding.avatar)
                                 userCache[otherUserId] = result.user
                                 binding.userName.text = result.user.displayName ?: "Unknown"
                             }

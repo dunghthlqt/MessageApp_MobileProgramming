@@ -21,6 +21,9 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         repository.login(email, password) { success, message -> loginResult.value = Pair(success, message) }
     }
+    fun logout() {
+        repository.logout() { _, _ -> currentUser.value = null}
+    }
     fun getCurrentUser() {
         val firebaseUser = repository.getCurrentUser()
         if (firebaseUser != null) {
