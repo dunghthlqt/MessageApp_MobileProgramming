@@ -1,6 +1,7 @@
 package com.demo.messageapp.view.fragment
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -24,6 +26,7 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.demo.messageapp.databinding.FragmentChatBinding
+import com.demo.messageapp.model.Message
 import com.demo.messageapp.model.ReplyInfo
 import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.view.adapter.MessageAdapter
@@ -47,6 +50,7 @@ class ChatFragment : Fragment() {
     private lateinit var conversationViewModel: ConversationViewModel
     private lateinit var userViewModel: UserViewModel
     private lateinit var layoutManager: LinearLayoutManager
+    private var originalMessages: List<Message> = emptyList()
 
     private var conversationId: String? = null
     private var conversationName: String? = null
@@ -184,6 +188,7 @@ class ChatFragment : Fragment() {
                     if (it.isEmpty()) {
                         binding.messageRecyclerView.visibility = View.GONE
                     } else {
+                        originalMessages = it
                         adapter.updateData(result.messageList)
                         scrollToBottom()
                     }
@@ -265,6 +270,12 @@ class ChatFragment : Fragment() {
                     messageViewModel.removeMessageListener()
                     findNavController().navigateToHomeAndClearBackStack()
                 },
+                onSearchListener = {
+                    binding.searchBar.searchBarContainer.visibility = View.VISIBLE
+                    binding.searchBar.editTextSearch.requestFocus()
+                    val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(binding.searchBar.editTextSearch, InputMethodManager.SHOW_IMPLICIT)
+                },
                 x = x,
                 y = y
             )
@@ -276,6 +287,23 @@ class ChatFragment : Fragment() {
         }
         binding.btnAttachment.setOnClickListener {
             checkStoragePermission()
+        }
+        binding.searchBar.editTextSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString().trim()
+                binding.searchBar.btnClearSearch.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+                filterMessages(query)
+            }
+        })
+
+        binding.searchBar.btnClearSearch.setOnClickListener {
+            binding.searchBar.editTextSearch.setText("")
+            binding.searchBar.searchBarContainer.visibility = View.GONE
+            adapter.updateData(originalMessages)
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(binding.searchBar.editTextSearch.windowToken, 0)
         }
     }
 
@@ -391,5 +419,21 @@ class ChatFragment : Fragment() {
 
     private fun sendImageMessage(imageUrl: String) {
         messageViewModel.sendMessage(conversationId!!, userUid!!, imageUrl, "image")
+    }
+
+    private fun filterMessages(query: String) {
+        if (query.isEmpty()) {
+            adapter.updateData(originalMessages)
+            return
+        }
+
+        val filteredMessages = originalMessages.filter { message ->
+            message.content.contains(query, ignoreCase = true)
+        }
+        adapter.updateData(filteredMessages)
+
+        if (filteredMessages.isNotEmpty()) {
+            binding.messageRecyclerView.smoothScrollToPosition(0)
+        }
     }
 }
