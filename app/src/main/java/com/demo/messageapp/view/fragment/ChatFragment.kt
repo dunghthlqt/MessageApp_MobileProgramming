@@ -59,12 +59,16 @@ class ChatFragment : Fragment() {
     private var anotherUid: String = ""
     private var anotherName: String? = null
     private var originalMessageId: String = ""
+    private var requestedPermission: String? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
+        val permission = requestedPermission
         if (isGranted) {
-            openImagePicker()
+            when (permission) {
+                Manifest.permission.READ_EXTERNAL_STORAGE -> openImagePicker()
+            }
         } else {
             Toast.makeText(requireContext(), "Cần quyền truy cập bộ nhớ", Toast.LENGTH_SHORT).show()
         }
@@ -363,6 +367,7 @@ class ChatFragment : Fragment() {
         ) {
             openImagePicker()
         } else {
+            requestedPermission = Manifest.permission.READ_EXTERNAL_STORAGE
             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }

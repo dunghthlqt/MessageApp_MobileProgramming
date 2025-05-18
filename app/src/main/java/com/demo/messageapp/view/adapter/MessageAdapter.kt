@@ -1,5 +1,7 @@
 package com.demo.messageapp.view.adapter
 
+import android.R
+import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -15,12 +17,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.demo.messageapp.databinding.DialogFullscreenImageBinding
 import com.demo.messageapp.databinding.ItemMessageReceivedBinding
 import com.demo.messageapp.databinding.ItemMessageSentBinding
 import com.demo.messageapp.databinding.ItemReplyMessageReceivedBinding
 import com.demo.messageapp.databinding.ItemReplyMessageSentBinding
 import com.demo.messageapp.model.Message
 import com.demo.messageapp.model.Reaction
+import com.demo.messageapp.view.dialog.FullScreenImageViewDialog
 import com.demo.messageapp.view.dialog.MessageOptionsDialog
 import com.demo.messageapp.viewmodel.UserViewModel
 import java.text.SimpleDateFormat
@@ -271,14 +275,22 @@ class MessageAdapter(
     }
 
     private fun showMessageOptions(message: Message) {
-        val optionsDialog = MessageOptionsDialog(
-            context = context,
-            message = message,
-            onReplyListener = onReplyListener,
-            onDeleteListener = onDeleteListener,
-            onReactionAddedListener = onReactionAddedListener
-        )
-        optionsDialog.show()
+        if (message.type == "image") {
+            val imageViewDialog = FullScreenImageViewDialog(
+                context = context,
+                imageUrl = message.content
+            )
+            imageViewDialog.show()
+        } else {
+            val optionsDialog = MessageOptionsDialog(
+                context = context,
+                message = message,
+                onReplyListener = onReplyListener,
+                onDeleteListener = onDeleteListener,
+                onReactionAddedListener = onReactionAddedListener
+            )
+            optionsDialog.show()
+        }
     }
     private fun bindReactions(container: LinearLayout, reactions: List<Reaction>) {
         container.removeAllViews()
@@ -292,5 +304,21 @@ class MessageAdapter(
             }
             container.addView(emojiView)
         }
+    }
+    private fun showFullScreenImage(imageUrl: String) {
+        val dialog = Dialog(context, R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialogBinding = DialogFullscreenImageBinding.inflate(LayoutInflater.from(context))
+        dialog.setContentView(dialogBinding.root)
+
+        Glide.with(context)
+            .load(imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(dialogBinding.fullscreenImageView)
+
+        dialogBinding.btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }
