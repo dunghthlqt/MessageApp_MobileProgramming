@@ -11,7 +11,9 @@ import com.demo.messageapp.model.Conversation
 
 class ConversationOptionsDialog(
     private val context: Context,
-    private val onDeleteListener: () -> Unit
+    private val onDeleteListener: () -> Unit,
+    private val x: Int,
+    private val y: Int
 ) {
     private val dialog: Dialog = Dialog(context)
 
@@ -28,7 +30,15 @@ class ConversationOptionsDialog(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT
         )
-        window?.setGravity(Gravity.CENTER)
+        window?.setBackgroundDrawable(null)
+        window?.setGravity(Gravity.TOP or Gravity.LEFT)
+        window?.setDimAmount(0f)
+
+
+        val attributes = window?.attributes
+        attributes?.x = x
+        attributes?.y = y
+        window?.attributes = attributes
 
         dialog.findViewById<TextView>(R.id.textViewDelete).setOnClickListener {
             onDeleteListener()

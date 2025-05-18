@@ -13,7 +13,7 @@
         android:id="@+id/cardViewMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#27A7E7"
+        app:cardBackgroundColor="#4FC3F7"
         app:cardCornerRadius="12dp"
         app:cardElevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,6 +38,17 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Hello World" />
 
+            <ImageView
+                android:id="@+id/imageViewMessage"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="gone"
+                android:scaleType="centerCrop" />
+
             <LinearLayout
                 android:id="@+id/reactionsContainer"
                 android:layout_width="wrap_content"
@@ -49,7 +60,6 @@
                 app:layout_constraintEnd_toStartOf="@+id/linearLayout2"
                 app:layout_constraintTop_toBottomOf="@id/textViewMessage">
 
-                <!-- Reactions sẽ được thêm động trong code -->
             </LinearLayout>
 
             <LinearLayout
@@ -70,15 +80,6 @@
                     android:textSize="10sp"
                     tools:ignore="SmallSp"
                     tools:text="10:32 AM" />
-
-                <!--                <ImageView-->
-                <!--                    android:id="@+id/imageViewStatus"-->
-                <!--                    android:layout_width="14dp"-->
-                <!--                    android:layout_height="14dp"-->
-                <!--                    android:layout_marginStart="4dp"-->
-                <!--                    android:contentDescription="@string/message_status"-->
-                <!--                    android:src="@drawable/ic_check"-->
-                <!--                    app:tint="#B3FFFFFF" />-->
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
