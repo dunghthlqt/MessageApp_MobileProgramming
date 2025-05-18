@@ -4,9 +4,9 @@ import android.content.Context
 import com.cloudinary.android.MediaManager
 
 object CloudinaryConfig {
-    private const val CLOUD_NAME = "dtrtgk0ff"
-    private const val API_KEY = "643721862766188"
-    private const val API_SECRET = "KE_kINfl2GhkBsS7FLrTebuxYYI"
+    private const val CLOUD_NAME = ""
+    private const val API_KEY = ""
+    private const val API_SECRET = ""
 
     fun init(context: Context) {
         val config = hashMapOf(
