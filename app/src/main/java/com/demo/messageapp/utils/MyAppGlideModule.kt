@@ -1,4 +1,4 @@
-package com.demo.messageapp.view.dialog
+package com.demo.messageapp.utils
 
 import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.module.AppGlideModule
