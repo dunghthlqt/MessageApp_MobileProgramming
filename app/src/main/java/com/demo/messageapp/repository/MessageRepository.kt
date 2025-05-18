@@ -14,10 +14,14 @@ class MessageRepository {
 
     private var messageListener: ListenerRegistration? = null
 
-    fun sendMessage(conversationId: String, userUid: String, content: String, callback: (Boolean, String?) -> Unit) {
+    fun sendMessage(conversationId: String, userUid: String, content: String, contentType: String, callback: (Boolean, String?) -> Unit) {
         val docRef = db.collection("conversations").document(conversationId)
 
-        docRef.update("lastMessage", content)
+        if(contentType == "text") {
+            docRef.update("lastMessage", content)
+        } else {
+            docRef.update("lastMessage", "Image")
+        }
         docRef.update("lastSendTime", System.currentTimeMillis())
 
         val messageRef = docRef.collection("messages").document()
@@ -28,7 +32,7 @@ class MessageRepository {
             senderId = userUid,
             content = content,
             timestamp = System.currentTimeMillis(),
-            type = "text"
+            type = contentType
         )
 
         messageRef.set(message)
@@ -39,10 +43,14 @@ class MessageRepository {
                 callback(false, e.message)
             }
     }
-    fun sendReplyMessage(conversationId: String, userUid: String, content: String, reply: ReplyInfo, callback: (Boolean, String?) -> Unit) {
+    fun sendReplyMessage(conversationId: String, userUid: String, content: String, contentType: String, reply: ReplyInfo, callback: (Boolean, String?) -> Unit) {
         val docRef = db.collection("conversations").document(conversationId)
 
-        docRef.update("lastMessage", content)
+        if(contentType == "text") {
+            docRef.update("lastMessage", content)
+        } else {
+            docRef.update("lastMessage", "Image")
+        }
         docRef.update("lastSendTime", System.currentTimeMillis())
 
         val messageRef = docRef.collection("messages").document()
@@ -53,7 +61,7 @@ class MessageRepository {
             senderId = userUid,
             content = content,
             timestamp = System.currentTimeMillis(),
-            type = "text",
+            type = contentType,
             replyInfo = reply
         )
 

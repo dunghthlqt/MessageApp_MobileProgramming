@@ -18,13 +18,13 @@ class MessageViewModel : ViewModel() {
     val addMessageListenerResult = MutableLiveData<GetMessageListResult>()
     val addReactionResult = MutableLiveData<Pair<Boolean, String?>>()
 
-    fun sendMessage(conversationId: String, userUid: String, content: String) {
-        repository.sendMessage(conversationId, userUid, content) {success, message ->
+    fun sendMessage(conversationId: String, userUid: String, content: String, contentType: String) {
+        repository.sendMessage(conversationId, userUid, content, contentType) {success, message ->
             sendMessageResult.value = Pair(success, message)
         }
     }
-    fun sendReplyMessage(conversationId: String, userUid: String, content: String, reply: ReplyInfo) {
-        repository.sendReplyMessage(conversationId, userUid, content, reply) {success, message ->
+    fun sendReplyMessage(conversationId: String, userUid: String, content: String, contentType: String, reply: ReplyInfo) {
+        repository.sendReplyMessage(conversationId, userUid, content, contentType, reply) {success, message ->
             sendMessageResult.value = Pair(success, message)
         }
     }

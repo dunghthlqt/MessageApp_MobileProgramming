@@ -1,13 +1,20 @@
 package com.demo.messageapp.view.adapter
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.Log
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.demo.messageapp.databinding.ItemMessageReceivedBinding
 import com.demo.messageapp.databinding.ItemMessageSentBinding
 import com.demo.messageapp.databinding.ItemReplyMessageReceivedBinding
@@ -32,6 +39,7 @@ class MessageAdapter(
 
     fun getMessages(): List<Message> = messages
     private val userNameCache = mutableMapOf<String, String>()
+    private val imageCache = LruCache<String, Bitmap>(1024 * 1024 * 20)
 
     companion object {
         private const val VIEW_TYPE_SENT = 1
@@ -44,8 +52,39 @@ class MessageAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(message: Message) {
+            binding.textViewMessage.visibility = View.GONE
+            binding.imageViewMessage.visibility = View.GONE
+            binding.imageViewMessage.setImageDrawable(null)
             binding.textViewTime.text = formatTime(message.timestamp)
-            binding.textViewMessage.text = message.content
+
+            if(message.type == "text") {
+                binding.textViewMessage.text = message.content
+                binding.textViewMessage.visibility = View.VISIBLE
+            } else {
+                binding.imageViewMessage.visibility = View.VISIBLE
+                val cachedBitmap = imageCache.get(message.content)
+                if (cachedBitmap != null) {
+                    binding.imageViewMessage.setImageBitmap(cachedBitmap)
+                } else {
+                    Glide.with(context)
+                        .asBitmap()
+                        .load(message.content)
+                        .thumbnail(0.25f)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .dontTransform()
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                                binding.imageViewMessage.setImageBitmap(resource)
+                                imageCache.put(message.content, resource)
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {
+
+                            }
+                        })
+                }
+            }
+
             binding.cardViewMessage.setOnClickListener {
                 showMessageOptions(message)
             }
@@ -57,8 +96,38 @@ class MessageAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(message: Message) {
+            binding.textViewMessage.visibility = View.GONE
+            binding.imageViewMessage.visibility = View.GONE
+            binding.imageViewMessage.setImageDrawable(null)
             binding.textViewTime.text = formatTime(message.timestamp)
-            binding.textViewMessage.text = message.content
+
+            if(message.type == "text") {
+                binding.textViewMessage.text = message.content
+                binding.textViewMessage.visibility = View.VISIBLE
+            } else {
+                binding.imageViewMessage.visibility = View.VISIBLE
+                val cachedBitmap = imageCache.get(message.content)
+                if (cachedBitmap != null) {
+                    binding.imageViewMessage.setImageBitmap(cachedBitmap)
+                } else {
+                    Glide.with(context)
+                        .asBitmap()
+                        .load(message.content)
+                        .thumbnail(0.25f)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .dontTransform()
+                        .into(object : CustomTarget<Bitmap>() {
+                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                                binding.imageViewMessage.setImageBitmap(resource)
+                                imageCache.put(message.content, resource)
+                            }
+
+                            override fun onLoadCleared(placeholder: Drawable?) {
+
+                            }
+                        })
+                }
+            }
             binding.cardViewMessage.setOnClickListener {
                 showMessageOptions(message)
             }
@@ -212,13 +281,9 @@ class MessageAdapter(
         optionsDialog.show()
     }
     private fun bindReactions(container: LinearLayout, reactions: List<Reaction>) {
-        // Xóa các view cũ
         container.removeAllViews()
-
-        // Ẩn container nếu không có reactions
         container.visibility = if (reactions.isEmpty()) View.GONE else View.VISIBLE
 
-        // Thêm TextView cho mỗi emoji
         reactions.forEach { reaction ->
             val emojiView = TextView(context).apply {
                 text = reaction.emoji

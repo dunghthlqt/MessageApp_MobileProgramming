@@ -60,17 +60,22 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
-    implementation ("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.11.0")
 
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.9.0")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.9.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.0")
 
     implementation("io.agora.rtc:full-sdk:4.5.2")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment:2.7.7")
+    implementation("androidx.navigation:navigation-ui:2.7.7")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

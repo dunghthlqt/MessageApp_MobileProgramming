@@ -152,9 +152,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toTopOf="@+id/editTextMessage"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
                 <EditText
                     android:id="@+id/editTextMessage"
@@ -171,10 +171,22 @@
                     android:paddingEnd="60dp"
                     android:paddingBottom="8dp"
                     android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/replyPreview"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/btn_attachment"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/attachment"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="@id/editTextMessage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/editTextMessage"
+                    app:tint="#B5B4B6" />
 
                 <ImageButton
                     android:id="@+id/btn_send"
@@ -184,9 +196,9 @@
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_send"
                     android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/editTextMessage"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/editTextMessage"
                     app:tint="#0088CC" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
