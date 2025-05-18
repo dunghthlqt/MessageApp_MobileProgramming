@@ -12,6 +12,7 @@ import com.demo.messageapp.model.Conversation
 class ConversationOptionsDialog(
     private val context: Context,
     private val onDeleteListener: () -> Unit,
+    private val onSearchListener: () -> Unit,
     private val x: Int,
     private val y: Int
 ) {
@@ -42,6 +43,10 @@ class ConversationOptionsDialog(
 
         dialog.findViewById<TextView>(R.id.textViewDelete).setOnClickListener {
             onDeleteListener()
+            dialog.dismiss()
+        }
+        dialog.findViewById<TextView>(R.id.textViewSearch).setOnClickListener {
+            onSearchListener()
             dialog.dismiss()
         }
     }
