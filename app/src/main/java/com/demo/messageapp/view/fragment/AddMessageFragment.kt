@@ -49,7 +49,7 @@ class AddMessageFragment : Fragment() {
 
         conversationViewModel.resetConversationTwoUidResult()
 
-        adapter = ContactsAdapter(emptyList()) { contact ->
+        adapter = ContactsAdapter(emptyList(), context = requireContext()) { contact ->
             conversationName = ""
             conversationName = contact.displayName
             participantIds = listOf(currentUid, contact.uid)

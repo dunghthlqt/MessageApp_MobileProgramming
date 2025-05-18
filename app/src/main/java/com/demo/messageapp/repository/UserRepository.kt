@@ -1,13 +1,19 @@
 package com.demo.messageapp.repository
 
+import android.content.Context
+import android.net.Uri
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.demo.messageapp.model.User
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
 class UserRepository {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
     private var contactListener: ListenerRegistration? = null
 
     fun searchUserbyUid(userUid: String, callback: (Boolean, String?, User?) -> Unit) {
@@ -23,7 +29,18 @@ class UserRepository {
                     val displayName = document.getString("displayName") ?: ""
                     val avatarUrl = document.getString("avatarUrl") ?: ""
                     val isOnline = document.getBoolean("isOnline") ?: false
-                    val lastSeen = document.getLong("lastSeen") ?: 0
+
+                    val lastSeen: Long = when (val lastSeenValue = document.get("lastSeen")) {
+                        is Long -> lastSeenValue
+                        is Number -> lastSeenValue.toLong()
+                        is Timestamp -> lastSeenValue.toDate().time
+                        is String -> try {
+                            lastSeenValue.toLong()
+                        } catch (e: NumberFormatException) {
+                            0L
+                        }
+                        else -> 0L
+                    }
 
                     val user = User(
                         uid = uid,
@@ -53,7 +70,18 @@ class UserRepository {
                     val displayName = user.getString("displayName") ?: ""
                     val avatarUrl = user.getString("avatarUrl") ?: ""
                     val isOnline = user.getBoolean("isOnline") ?: false
-                    val lastSeen = user.getLong("lastSeen") ?: 0
+
+                    val lastSeen: Long = when (val lastSeenValue = user.get("lastSeen")) {
+                        is Long -> lastSeenValue
+                        is Number -> lastSeenValue.toLong()
+                        is Timestamp -> lastSeenValue.toDate().time
+                        is String -> try {
+                            lastSeenValue.toLong()
+                        } catch (e: NumberFormatException) {
+                            0L
+                        }
+                        else -> 0L
+                    }
 
                     val userr = User(
                         uid = uid,
@@ -185,5 +213,82 @@ class UserRepository {
     }
     fun removeContactListener() {
         contactListener?.remove()
+    }
+    fun updateUserProfile(displayName: String, imageUri: Uri?, context: Context, callback: (Boolean, String?) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            callback(false, "Người dùng chưa đăng nhập")
+            return
+        }
+
+        if (imageUri != null) {
+            val filePath = getRealPathFromUri(context, imageUri)
+            if (filePath != null) {
+                MediaManager.get().upload(filePath)
+                    .callback(object : UploadCallback {
+                        override fun onStart(requestId: String) {
+
+                        }
+
+                        override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+
+                        }
+
+                        override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+                            var imageUrl = resultData["url"] as String
+                            if (imageUrl.startsWith("http://")) {
+                                imageUrl = imageUrl.replace("http://", "https://")
+                            }
+                            db.collection("users")
+                                .document(user.uid)
+                                .update("displayName", displayName)
+                                .addOnSuccessListener { _ ->
+                                    db.collection("users")
+                                        .document(user.uid)
+                                        .update("avatarUrl", imageUrl)
+                                        .addOnSuccessListener { _ ->
+                                            callback(true, null)
+                                        }
+                                        .addOnFailureListener { e ->
+                                            callback(false, e.message)
+                                        }
+                                }
+                                .addOnFailureListener { e ->
+                                    callback(false, e.message)
+                                }
+                        }
+
+                        override fun onError(requestId: String, error: ErrorInfo) {
+                            callback(false, "Tải ảnh thất bại: ${error.description}")
+                        }
+
+                        override fun onReschedule(requestId: String, error: ErrorInfo) {
+                            // Không xử lý reschedule
+                        }
+                    })
+                    .dispatch()
+            } else {
+                callback(false, "Không thể lấy đường dẫn tệp ảnh")
+            }
+        } else {
+            db.collection("users")
+                .document(user.uid)
+                .update("displayName", displayName)
+                .addOnSuccessListener { _ ->
+                    callback(true, null)
+                }
+                .addOnFailureListener { e ->
+                    callback(false, e.message)
+                }
+        }
+    }
+
+    private fun getRealPathFromUri(context: Context, uri: Uri): String? {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        return cursor?.use {
+            it.moveToFirst()
+            val columnIndex = it.getColumnIndexOrThrow("_data")
+            it.getString(columnIndex)
+        }
     }
 }

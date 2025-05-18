@@ -1,14 +1,17 @@
 package com.demo.messageapp.view.adapter
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.demo.messageapp.databinding.ItemContactBinding
 import com.demo.messageapp.model.User
 
 class ContactsAdapter(
     private var contacts: List<User>,
+    private val context: Context,
     private val onContactsClick: (User) -> Unit
 ) : RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder>() {
 
@@ -19,8 +22,9 @@ class ContactsAdapter(
             val name = contact.displayName
             val isOnline = if (contact.isOnline) "Online" else "Offline"
 
-            Log.d("Home", "Name = $name")
-            Log.d("Home", "Online = $isOnline")
+            Glide.with(context)
+                .load(contact.avatarUrl)
+                .into(binding.avatar)
 
             binding.userName.text = name
             binding.isOnline.text = isOnline

@@ -31,6 +31,11 @@ class AuthRepository {
             }
     }
 
+    fun logout(callback: (Boolean, String?) -> Unit) {
+        auth.signOut()
+        callback(true, null)
+    }
+
     fun getCurrentUser(): FirebaseUser? {
         return auth.currentUser
     }

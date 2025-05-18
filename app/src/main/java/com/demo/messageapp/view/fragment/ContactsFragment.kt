@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.demo.messageapp.R
 import com.demo.messageapp.utils.navigateToHomeAndClearBackStack
 import com.demo.messageapp.databinding.FragmentContactsBinding
 import com.demo.messageapp.view.adapter.ContactsAdapter
@@ -28,6 +29,7 @@ class ContactsFragment : Fragment() {
     private lateinit var conversationViewModel: ConversationViewModel
     private var currentUid: String = ""
     private var conversationName: String = ""
+    private var participantIds: List<String> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,19 +48,30 @@ class ContactsFragment : Fragment() {
 
         conversationViewModel.resetConversationTwoUidResult()
 
-        adapter = ContactsAdapter(emptyList()) { contact ->
+        adapter = ContactsAdapter(emptyList(), context = requireContext()) { contact ->
             conversationName = ""
             conversationName = contact.displayName
+            participantIds = listOf(currentUid, contact.uid)
             conversationViewModel.getConversationTwoUID(currentUid, contact.uid)
         }
 
         binding.conversationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.conversationRecyclerView.adapter = adapter
 
+        conversationViewModel.createConversationResult.observe(viewLifecycleOwner, Observer { result ->
+            if(result.success) {
+                navigateToChatFragment(result.conversationId!!)
+            } else {
+                Log.d("ContactsFragment", "Error = ${result.errorMessage}")
+            }
+        })
+
         conversationViewModel.getConversationTwoUidResult.observe(viewLifecycleOwner, Observer { result ->
             if(result.success) {
-                if(result != null) {
+                if(result != null && !result.conversationId.equals("")) {
                     navigateToChatFragment(result.conversationId!!)
+                } else {
+                    conversationViewModel.createConversation(participantIds, "", currentUid)
                 }
             } else {
                 Log.d("ContactsFragment", "Error = ${result.errorMessage}")
@@ -105,6 +118,10 @@ class ContactsFragment : Fragment() {
             findNavController().navigateToHomeAndClearBackStack()
         }
 
+        binding.btnSetting.setOnClickListener {
+            findNavController().navigate(R.id.action_contactsFragment_to_settingsFragment)
+        }
+
         binding.btnAdd.setOnClickListener {
             val dialog = NewContactFragment()
             dialog.show(parentFragmentManager, "NewContactDialog")
@@ -114,6 +131,7 @@ class ContactsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        userViewModel.removeContactListener()
     }
 
     override fun onStop() {

@@ -43,7 +43,8 @@ class HomeFragment : Fragment() {
         // Khởi tạo adapter trước với danh sách rỗng
         adapter = ConversationAdapter(
             conversations = emptyList(),
-            currentUserUid = currentUid,  // Sẽ được cập nhật sau khi có currentUser
+            currentUserUid = currentUid,
+            context = requireContext(),
             userViewModel = userViewModel,
             onConversationClick = { conversation ->
                 navigateToChatFragment(conversation)
@@ -59,13 +60,13 @@ class HomeFragment : Fragment() {
                 currentUid = result.uid
                 // Cập nhật currentUserUid cho adapter
                 adapter.updateCurrentUserUid(currentUid)
-                conversationViewModel.getConversationList(currentUid)
+                conversationViewModel.addConversationListener(currentUid)
             }
         })
 
         authViewModel.getCurrentUser()
-        
-        conversationViewModel.getConversationListResult.observe(viewLifecycleOwner, Observer { result ->
+
+        conversationViewModel.addConversationListenerResult.observe(viewLifecycleOwner, Observer { result ->
             if (result.success) {
                 result.conversationList?.let {
                     if (it.isEmpty()) {
@@ -74,8 +75,7 @@ class HomeFragment : Fragment() {
                     } else {
                         binding.conversationRecyclerView.visibility = View.VISIBLE
                         binding.noMessagesTextView.visibility = View.GONE
-
-                        adapter.updateData(result.conversationList)
+                        adapter.updateData(it)
                     }
                 }
             } else {
@@ -83,14 +83,11 @@ class HomeFragment : Fragment() {
             }
         })
 
-        binding.btnSearch.setOnClickListener{
-
-        }
         binding.btnContacts.setOnClickListener{
             findNavController().navigate(R.id.action_homeFragment_to_contactsFragment)
         }
         binding.btnSetting.setOnClickListener{
-
+            findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
         }
 
         binding.btnAdd.setOnClickListener{
